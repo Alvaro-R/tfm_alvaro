@@ -26,7 +26,7 @@ def get_target_id_maximum_ic50(organism_name: str, activity_type: str) -> pd.Dat
 
     # GET THE MOLECULES FOR THAT TARGET WITH ACTIVITY IC50
     molecules = activity_client.filter(
-        target_chembl_id__in=targets_id, standard_type= activity_type
+        target_chembl_id__in=targets_id, standard_type=activity_type
     ).only(["target_chembl_id", "molecule_chembl_id"])
     # MOLECULES TO DATAFRAME
     molecules = pd.DataFrame.from_dict(molecules)
@@ -48,7 +48,7 @@ def get_molecules_from_target_activity(target_id: str, activity: str) -> pd.Data
     Returns:
         pd.DataFrame: Molecules for a target with a given activity.
     """
-    
+
     # ACTIVITY CONNECTION
     activity_client = new_client.activity
     # GET MOLECULES FROM TARGET

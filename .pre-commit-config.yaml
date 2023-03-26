@@ -1,0 +1,35 @@
+repos:
+
+#TEST BLACK FORMATING
+- repo: https://github.com/ambv/black
+  rev: 23.1.0
+  hooks:
+  - id: black
+    #CONFIGURE BLACK ARGUMENTS
+    args:
+      - --line-length=88
+    # language should be local
+    language_version: python3.11.2
+    stages: [commit]
+
+#TEST FLAKE8 FORMATING
+- repo: https://github.com/pycqa/flake8
+  rev: 3.7.9
+  hooks:
+  - id: flake8
+    #CONFIGURE FLAKE8 ARGUMENTS    
+    args:
+      - "--max-line-length=88"
+      #EXCLUDED DIRECTORIES
+      - "--exclude=build,dist,*__init__.py"
+      #IGNORE ERRORS TO AVOID CONFLICTS WITH BLACK
+      # E203: whitespace before.
+      # W503: line break before binary operator
+      #E266: too many leading '#' for block comment
+      #E501: line too long
+      #F403: 'from module import *' used; unable to detect undefined names
+      #F401: 'module' imported but unused
+      - "--ignore=E203,W503"
+      - "--max-complexity=18"
+      - "--select=B,C,E,F,W,T4,B9"
+    stages: [commit]
