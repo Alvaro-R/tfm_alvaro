@@ -49,8 +49,8 @@ repos:
       # D407 Missing dashed underline after section ('Attributes')
       # D413 Missing blank line after last section ('Returns')
       # D416 Section name should end with a semicolon ('Parameters:', not 'Parameters')
-      - "--ignore = D100,D104,D107,D203,D213,D406,D407,D413,D416"
-      - --match = .*\.py
+      - "--ignore=D100,D104,D107,D203,D212,D406,D407,D413,D416"
+      - "--match=.*\\.py"
     stages: [commit]
 
 #MYPY TYPE CHECKING

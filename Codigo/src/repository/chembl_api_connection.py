@@ -3,7 +3,7 @@ from chembl_webresource_client.new_client import new_client
 import pandas as pd
 
 
-def get_target_id_maximum_ic50(organism_name: str, activity_type: str) -> pd.DataFrame:
+def get_target_id_maximum_ic50(organism_name: None, activity_type: str) -> str:
     """
     Get the target id with maximum number of molecules with activity IC50.
 
@@ -14,7 +14,6 @@ def get_target_id_maximum_ic50(organism_name: str, activity_type: str) -> pd.Dat
     Returns:
         The target ID with the maximum number of molecules with activity IC50.
     """
-
     # GET TARGETS FOR THAT ORGANISM
     target_client = new_client.target
     targets_id = target_client.filter(organism=organism_name).only(["target_chembl_id"])
@@ -48,7 +47,6 @@ def get_molecules_from_target_activity(target_id: str, activity: str) -> pd.Data
     Returns:
         pd.DataFrame: Molecules for a target with a given activity.
     """
-
     # ACTIVITY CONNECTION
     activity_client = new_client.activity
     # GET MOLECULES FROM TARGET
