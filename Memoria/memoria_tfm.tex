@@ -1,0 +1,54 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{adjustbox} %%%%% INCLUIR GRÁFICOS CON includegraphics
+\usepackage{float}  %%%%% PARA EVITAR QUE LA FIGURA SEA FLOTANTE CON [H]
+
+
+
+%%%%%%% TÍTULO %%%%%%%
+\title{Brief Article Elucidating inhibition mechanism}
+%%%%%%% AUTOR %%%%%%%
+\author{Álvaro Román Gómez}
+%%%%%%% DIRECTOR %%%%%%%
+\def\director{Jorge Valencia Delgadillo}
+%%%%%%% UNIVERSIDADES %%%%%%%
+\def\uoc{Universitat Oberta de Catalunya}
+\def\ub{Universitat de Barcelona}
+%%%%%%% UNIVERSIDADES %%%%%%%
+\def\facultad{Faculty of Health Sciences}
+
+
+%%%%%%% EMPIEZA EL DOCUMENTO %%%%%%%
+\begin{document}
+%%%%%%% Indicamos a LATEX que minimice el corte de las palabras para pasar de una línea a otra. %%%%%%%
+\sloppy
+
+	%%%%%%% EMPIEZA PÁGINA DE TÍTULO %%%%%%%
+	\begin{titlepage}
+	
+		%%%%%%% SE CENTRA EL CONTENIDO %%%%%%%
+		\begin{center}
+		\vspace*{-1in}
+		%%%%%%% SE INSERTA LOGO DE LA UNIVERSIDAD%%%%%%%
+		\begin{figure}[H]
+			\begin{center}
+				\includegraphics[width=15cm]{./figures/logo_uoc}
+			\end{center}
+		\end{figure}
+		%%%%%%% TERMINA LOGO DE LA UNIVERSIDAD%%%%%%%
+		%%%%%%% SE INSERTA UNA LÍNEA %%%%%%%
+		\rule{80mm}{0.1mm}\\
+		\vspace*{0.15in}
+		%%%%%%% NOMBRE UNIVERSIDAD %%%%%%%		
+		\uoc
+		
+		
+
+		%%%%%%% SE TERMINA DE CENTRAR EL CONTENIDO %%%%%%%
+		\end{center}
+
+
+	%%%%%%% TERMINA PÁGINA DE TÍTULO %%%%%%%
+	\end{titlepage}
+
+%%%%%%% TERMINA EL DOCUMENTO %%%%%%%
+\end{document}

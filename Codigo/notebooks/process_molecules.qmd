@@ -1,0 +1,59 @@
+---
+
+
+---
+
+# CONEXIÓN A LA BASE DE DATOS CHEMBL Y OBTENCIÓN DE LOS MOLÉCULAS
+
+## IMPORTACIÓN DE LIBRERÍAS
+
+```{python}
+#PATH TO CUSTOM MODULES
+import sys
+sys.path.append("../src")
+
+#IMPORT LIBRARIES
+from chembl_webresource_client.new_client import new_client
+import pandas as pd
+import rdkit
+
+#IMPORT CUSTOM MODULES
+import repository.chembl_api_connection as chembl
+```
+
+## OBTENCIÓN DE LAS MOLÉCULAS PARA EL VIRUS ZIKA
+
+```{python}
+#GET THE TARGET ID WITH MAXIMUM NUMBER OF IC50 MOLECULES FOR A GIVEN ORGANISM
+organism = "Zika virus"
+activity = "IC50"
+target_id = chembl.get_target_id_maximum_ic50(organism, activity)
+```
+
+```{python}
+#GET MOLECULES FOR TARGET ID AND ACTIVITY TYPE
+molecules = chembl.get_molecules_from_target_activity(target_id, activity)
+```
+
+## PROCESAMIENTO DE LAS MOLECÚLAS
+
+### FILTRADO DEL DATASET
+
+```{python}
+#FIELDS FILTER
+molecules = molecules[["molecule_chembl_id", "molecule_pref_name", "canonical_smiles", "molecule_type"]]
+```
+
+```{python}
+#IC50 FILTER
+molecules = molecules[molecules["IC50"] < 10000]
+```
+
+### CÁLCULO DE DESCRIPTORES
+
+
+```{python}
+#CALCULATE DESCRIPTORS FOR MOLECULES with rdkit
+
+
+```
