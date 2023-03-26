@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+chembl-webresource-client = "*"
+jupyter = "*"
+quarto = "*"
+ipykernel = "*"
+pandas = "*"
+rdkit = "*"
+pytest = "*"
+flake8 = "*"
+black = "*"
+pre-commit = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
