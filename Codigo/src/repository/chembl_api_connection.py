@@ -14,6 +14,7 @@ def get_target_id_maximum_ic50(organism_name: str, activity_type: str) -> pd.Dat
     Returns:
         The target ID with the maximum number of molecules with activity IC50.
     """
+    # PRUEBA
     # GET TARGETS FOR THAT ORGANISM
     target_client = new_client.target
     targets_id = target_client.filter(organism=organism_name).only(["target_chembl_id"])
