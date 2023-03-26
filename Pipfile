@@ -17,6 +17,13 @@ black = "*"
 pre-commit = "*"
 mypy = "*"
 pydocstyle = "*"
+sphinx = "*"
+matplotlib = "*"
+seaborn = "*"
+scipy = "*"
+statsmodels = "*"
+sklearn = "*"
+scikit-learn = "*"
 
 [dev-packages]
 

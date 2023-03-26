@@ -1,0 +1,148 @@
+# DATA PREPROCESSING
+
+```{python}
+# PATH TO CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+
+# IMPORT CUSTOM MODULES
+import utils.stats as st
+
+# IMPORT LIBRARIES
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+```
+
+```{python}
+# DIRECTORIES
+data_path = "../data/"
+raw_data_path = data_path + "raw/"
+processed_data_path = data_path + "processed/"
+```
+
+```{python}
+# NAME OF DATASET FILE
+molecules_file = "CHEMBL4523954_descriptors.csv"
+
+# UPLOAD DATASET
+molecules = pd.read_csv(raw_data_path + molecules_file)
+```
+
+# EXPLORATORY DATA ANALYSIS
+
+## DATA STRUCTURE
+
+```{python}
+# SHOW FIRST 5 ROWS
+molecules.head(5)
+```
+
+```{python}
+# DATASET DIMENSIONS
+molecules.shape
+```
+
+```{python}
+# DATASET VARIABLES TYPES
+molecules.dtypes
+```
+
+```{python}
+molecules.describe()
+```
+
+## CHECK FOR MISSING VALUES
+
+```{python}
+molecules.isnull().sum().sum()
+```
+
+## CHECK FOR DUPLICATES
+
+```{python}
+molecules.duplicated().sum()
+```
+
+## ANALYZE CATEGORICAL VARIABLES
+
+```{python}
+# SEPARATE CATEGORICAL VARIABLES
+molecules_categorical = molecules.select_dtypes(include=["object"])
+# SEPARATE NUMERICAL VARIABLES
+molecules_numerical = molecules.select_dtypes(include=["int64", "float64"])
+```
+
+```{python}
+
+```
+
+```{python}
+len(molecules_categorical)
+```
+
+### STANDARD TYPE
+
+```{python}
+molecules_categorical["Standard Type"].unique()
+```
+
+### STANDARD RELATION
+
+```{python}
+molecules_categorical["Standard Relation"].unique()
+```
+
+### STANDARD UNITS
+
+```{python}
+molecules_categorical["Standard Units"].unique()
+```
+
+### TARGET CHEMBL ID
+
+```{python}
+molecules["Target ChEMBL ID"].unique()
+```
+
+## ANALYZE NUMERICAL VARIABLES
+
+
+```{python}
+```
+
+
+## ANALYZE TARGET VARIABLE
+
+```{python}
+
+```
+
+# DATA PREPROCESSING
+
+## DATA NORMALIZATION
+
+
+
+## REMOVE CORELATED VARIABLES
+
+```{python}
+# FILTER COLUMNS WITH PEARSON CORRELATION GREATER THAN 0.9
+molecules_corr_filter = st.pearson_corr_filter(molecules_numerical, 0.9)
+```
+
+```{python}
+# VIF APROXIMATION
+
+```
+
+## REMOVE LOW VARIANCE VARIABLES
+
+```{python}
+# REMOVE VARIABLES WITH LOW VARIANCE
+molecules_low_var_filter = st.low_var_filter(molecules_numerical, 0.01)
+molecules_low_var_filter
+```
