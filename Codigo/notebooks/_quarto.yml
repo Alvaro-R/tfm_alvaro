@@ -1,0 +1,69 @@
+# PROJECT INFORMATION
+project:
+  # NAME OF PROJECT
+  title: "notebooks"
+  # OUTPUT DIRECTORY FOR RENDERED FILES
+  output-dir: rendered
+
+# OUTPUT FORMATS
+format: 
+  # HTML
+  html:
+    theme: united
+    toc: true
+    toc-depth: 4
+    number-sections: true
+  # PDF
+  pdf:
+    toc: true
+    toc-depth: 4
+    number-sections: true
+
+# KNITR OPTIONS
+knitr:
+  opts_chunk:
+    fig.path: figures
+
+# AUTHOR INFORMATION
+author:
+  name: "Álvaro Román Gómez"
+  email: "roman.gomez.alvaro@gmail.com"
+  url: "https://alvaroroman.github.io/"
+  affiliation: "Universidad de Granada"
+  affiliation-url: "https://www.ugr.es/"
+  address: "Calle Periodista Daniel Saucedo Aranda, 18071 Granada"
+  phone: "+34 958 24 30 00"
+  twitter: "alvaroromang"
+  github: "alvaroroman"
+  linkedin: "alvaroromangomez"
+  orcid: "0000-0002-9076-1129"
+  google-scholar: "https://scholar.google.es/citations?user=Z4Z3QYIAAAAJ&hl=es"
+  researchgate: "https://www.researchgate.net/profile/Alvaro_Roman_Gomez"
+
+# Path: Codigo/notebooks/_quarto.yml
+# Path: Codigo/notebooks/_quarto.yml
+
+# DATE INFORMATION
+date: last-modified
+site: bookdown::bookdown_site
+documentclass: book
+
+# BIBLIOGRAPHY
+bibliography: ../../Memoria/bib/reference.bib
+biblio-style: apalike
+link-citations: yes
+
+# EXECUTION INFORMATION
+execute: 
+  cache: true
+  echo: true
+  warning: true
+  error: true
+  message: true
+
+
+
+
+
+
+

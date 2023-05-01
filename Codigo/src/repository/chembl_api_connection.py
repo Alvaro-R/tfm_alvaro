@@ -3,7 +3,9 @@ from chembl_webresource_client.new_client import new_client
 import pandas as pd
 
 
-def get_target_id_maximum_ic50(organism_name: str, activity_type: str) -> pd.DataFrame:
+def get_target_id_maximum_activity(
+    organism_name: str, activity_type: str
+) -> pd.DataFrame:
     """
     Get the target id with maximum number of molecules with activity IC50.
 

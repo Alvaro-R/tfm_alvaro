@@ -1,0 +1,181 @@
+---
+title: "Molecular descriptors and Fingerprints"
+---
+
+```{python import libraries, include=FALSE}
+import pandas as pd
+import numpy as np
+
+# IMPORT CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+import utils.molUtils as molUtils
+from utils.molUtils import *
+
+```
+
+# DATA PREPARATION
+
+## LOAD DATA
+
+First, we load the data obtained from CHEMBL database through the API. The data is stored in a csv file called `chembl_data.csv`. The data will be loaded into a pandas dataframe called `molecules`.
+
+```{python path, include=TRUE}
+# DIRECTORIES
+input_path = "../data/raw/"
+output_path = "../data/processed/"
+# FILES
+input_file = "CHEMBL4523954_raw.csv"
+```
+
+```{python load data, include=TRUE}
+# LOAD DATA INTO A PANDAS DATAFRAME
+molecules = pd.read_csv(input_path + input_file)
+```
+
+## DATASET DESCRIPTION
+
+A first descption of the dataset is obtained where the number of rows and columns is shown, as well as the names of the columns. Also, the data types of the columns will be shown:
+
+The dataset has 
+
+```{python dataset dimension, include=TRUE}
+# NUMBER OF ROWS AND COLUMNS
+print(
+    "The dataset has "
+    + str(molecules.shape[0])
+    + " rows and "
+    + str(molecules.shape[1])
+    + " columns."
+)
+```
+
+```{python}
+# DATASET COLUMN NAMES
+print("The columns of the dataset are:")
+print(molecules.columns)
+```
+
+```{python}
+# NUMBER OF COLUMNS PER DATA TYPE
+print("The dataset has:")
+print(molecules.dtypes.value_counts())
+```
+
+```{python}
+# COLUMNS THAT HAVE ALL UNIQUE VALUES
+print("The columns that have all unique values are:")
+print(molecules.columns[molecules.nunique() == molecules.shape[0]])
+```
+
+```{python}
+# COLUMNS THAT HAVE THE SAME VALUE
+print("The columns that have the same value are:")
+print(molecules.columns[molecules.nunique() == 1])
+```
+
+## REMOVE UNNECESSARY COLUMNS
+
+In order to calculate molecular descriptors and fingerprints, the SMILES strings of the molecules will be used, which are stored in the column `canonical_smiles`. Besides this information, the column standard_value will be used to calculate the activity of the molecules and then it will be needed in further analysis. The standard_value column contains the activity of the molecules in nM units. The activity will be calculated as the inverse of the standard_value, which will be stored in a new column called `activity`.
+
+Other than these columns, the rest of the columns will be removed.
+
+```{python remove unnecessary columns, include=TRUE}
+# REMOVE UNNECESSARY COLUMNS
+molecules = molecules[["canonical_smiles", "standard_value"]]
+```
+
+Having removed the unnecessary columns, calculation of molecular descriptors and fingerprints that will be used in the models construction can be performed.
+
+## DEFINE ACTIVE AND INACTIVE MOLECULES
+
+In order to define wether a molecule is active or inactive the standard value of the molecule will be taken inot account. First, the median will be calculated and the molecules with a standard value lower than the median will be considered active, while the molecules with a standard value higher than the median will be considered inactive.
+
+```{python standard value median, include=TRUE}
+# CALCULATE STANDARD VALUE MEDIAN
+standard_value_median = molecules["standard_value"].median()
+```
+
+```{python}
+# DEFINE ACTIVE AND INACTIVE MOLECULES
+molecules["activity"] = np.where(
+    molecules["standard_value"] < standard_value_median, 1, 0
+)
+# COUNT ACTIVE AND INACTIVE MOLECULES
+print("The dataset has:")
+print(str(molecules["activity"].value_counts()[1]) + " active molecules")
+print(str(molecules["activity"].value_counts()[0]) + " inactive molecules")
+```
+
+# CALCULATE MOLECULAR DESCRIPTORS AND FINGERPRINTS
+
+According to the literature, several moelcular descriptors and fingerprints have been used in the construction of models to predict the activity of molecules. The selection of these descriptors and fingerprints plays a key role in model performance. Sometimes, even more important than the model itself.
+
+After literature review, the following molecular descriptors and fingerprints were selected to be computed and therefore used in the models construction:
+
+- General and topological molecular descriptors (RDKit)
+- MACCS keys (MACCS)
+- Extended connectivity fingerprints (ECFP)
+
+```{python}
+# GET REPRESENTATION OF OF FIRST MOLECULE WITH RDKit
+molecule = Chem.MolFromSmiles(molecules["canonical_smiles"][0])
+molecule_b = Chem.MolFromSmiles(molecules["canonical_smiles"][1])
+```
+
+## MOLECULAR DESCRIPTORS
+
+```{python}
+# CALCULATE MOLECULAR DESCRIPTORS
+molecular_descriptors = molUtils.calculate_molecule_set(
+    molecules, "canonical_smiles", calculate_molecular_descriptors
+)
+
+```
+
+## FINGERPRINTS
+
+```{python}
+# CALCULATE MACC KEYS
+macc_keys = molUtils.calculate_molecule_set(
+    molecules, "canonical_smiles", calculate_maccs_keys
+)
+```
+
+```{python}
+# CALCULATE ECFP FINGERPRINTS
+ecfp4_fingerprints = molUtils.calculate_molecule_set(
+    molecules, "canonical_smiles", calculate_ecfp4_fingerprints
+)
+```
+
+
+# SAVE DATA
+
+The data obtained from the calculation of molecular descriptors and fingerprints will be saved in a csv file called `chembl_data.csv`.
+
+In total, there will be one dataframe for each type of molecular descriptor and fingerprint. Each of them will count with the SMILES string of the molecules and the corresponding standard value that represents the activity of the molecules. The SMILES can be seen as ID of the molecules and it will be removed in further analysis.
+
+```{python}
+# REMOVE SMILES AND STANDARD VALUE COLUMNS FROM ALL DATAFRAMES
+molecules = molecules.drop(["standard_value"], axis=1)
+molecular_descriptors = molecular_descriptors.drop(
+    ["canonical_smiles", "standard_value"], axis=1
+)
+macc_keys = macc_keys.drop(["canonical_smiles", "standard_value"], axis=1)
+ecfp4_fingerprints = ecfp4_fingerprints.drop(
+    ["canonical_smiles", "standard_value"], axis=1
+)
+```
+
+```{python}
+# SAVE CHEMBL DATA
+molecules.to_csv(output_path + "smiles_activity.csv", index=False)
+# SAVE MOLECULAR DESCRIPTORS
+molecular_descriptors.to_csv(output_path + "molecular_descriptors.csv", index=False)
+# SAVE MACCS KEYS
+macc_keys.to_csv(output_path + "macc_keys.csv", index=False)
+# SAVE ECFP FINGERPRINTS
+ecfp4_fingerprints.to_csv(output_path + "ecfp4_fingerprints.csv", index=False)
+```

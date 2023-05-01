@@ -1,6 +1,8 @@
-# DATA PREPROCESSING
+---
+title: "Molecular descriptors and Fingerprints"
+---
 
-```{python}
+```{python import libraries, echo=FALSE, message=FALSE, warning=FALSE}
 # PATH TO CUSTOM MODULES
 import sys
 
@@ -17,20 +19,23 @@ import seaborn as sns
 
 ```
 
-```{python}
+# LOAD DATASET
+
+```{python define paths, echo=FALSE, message=FALSE, warning=FALSE}
 # DIRECTORIES
-data_path = "../data/"
-raw_data_path = data_path + "raw/"
-processed_data_path = data_path + "processed/"
+input_path = "../data/raw/"
+output_path = "../data/processed/"
 ```
 
 ```{python}
-# NAME OF DATASET FILE
-molecules_file = "CHEMBL4523954_descriptors.csv"
-
-# UPLOAD DATASET
-molecules = pd.read_csv(raw_data_path + molecules_file)
+# FILES
+molecular_descriptors_file = "molecular_descriptors.csv"
+maccs_fingerprints_file = "maccs_fingerprints.csv"
+ecfp4_fingerprints_file = "ecfp4_fingerprints.csv"
+kfp_fingerprints_file = "kfp_fingerprints.csv"
 ```
+
+
 
 # EXPLORATORY DATA ANALYSIS
 
@@ -74,10 +79,6 @@ molecules.duplicated().sum()
 molecules_categorical = molecules.select_dtypes(include=["object"])
 # SEPARATE NUMERICAL VARIABLES
 molecules_numerical = molecules.select_dtypes(include=["int64", "float64"])
-```
-
-```{python}
-
 ```
 
 ```{python}
@@ -131,7 +132,8 @@ molecules["Target ChEMBL ID"].unique()
 
 ```{python}
 # FILTER COLUMNS WITH PEARSON CORRELATION GREATER THAN 0.9
-molecules_corr_filter = st.pearson_corr_filter(molecules_numerical, 0.9)
+molecules_corr_filter = st.pearson_corr_filter(molecules_numerical, 0.8)
+molecules_numerical.drop(molecules_corr_filter, axis=1, inplace=True)
 ```
 
 ```{python}
@@ -143,6 +145,35 @@ molecules_corr_filter = st.pearson_corr_filter(molecules_numerical, 0.9)
 
 ```{python}
 # REMOVE VARIABLES WITH LOW VARIANCE
-molecules_low_var_filter = st.low_var_filter(molecules_numerical, 0.01)
-molecules_low_var_filter
+molecules_low_var_filter = st.low_variance_filter(molecules_numerical, 0.99)
+molecules_numerical.drop(molecules_low_var_filter, axis=1, inplace=True)
 ```
+
+# MAX-MIN TRANSFORMATION
+
+```{python}
+# MAX-MIN TRANSFORMATION
+molecules_numerical = molecules_numerical.apply(
+    lambda x: (x - x.min()) / (x.max() - x.min())
+)
+molecules_numerical.fillna(0, inplace=True)
+```
+
+## CALCULATE RESPONSE VARIABLE FROM IC50 VALUES
+
+```{python}
+## CALCULATE RESPONSE VARIABLE FROM IC50 VALUES
+molecules_numerical["Response"] = molecules["Standard Value"].apply(
+    lambda x: 1 if x < 1000 else 0
+)
+```
+
+# SAVE PREPROCESSED DATASET
+
+```{python}
+# SAVE PREPROCESSED DATASET
+molecules_numerical.to_csv(
+    processed_data_path + molecules_file + "preprocessed.csv", index=False
+)
+```
+

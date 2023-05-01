@@ -98,4 +98,4 @@ def low_variance_filter(dataframe: pd.DataFrame, threshold=0) -> pd.DataFrame:
     # FIT IT TO DATA
     selector.fit_transform(dataframe)
     # RETURN COLUMNS WITH LOW VARIANCE
-    return dataframe.columns[selector.get_support()]
+    return list(dataframe.columns[selector.get_support()])

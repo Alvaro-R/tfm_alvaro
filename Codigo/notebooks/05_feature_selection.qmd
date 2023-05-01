@@ -1,0 +1,79 @@
+---
+title: "Feature selection of molecular descriptors"
+---
+
+
+```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.tree import DecisionTreeClassifier
+from genetic_selection import GeneticSelectionCV
+from sklearn.preprocessing import MinMaxScaler
+
+# IMPORT CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+import utils.stats as st
+
+```
+
+```{python paths, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# DIRECTORIES
+input_path = "../data/processed/"
+train_path = "../data/processed/train_data/"
+test_path = "../data/processed/test_data/"
+# FILES
+molecular_descriptors_training_file = "molecular_descriptors_training.csv"
+molecular_descriptors_test_file = "molecular_descriptors_test.csv"
+```
+
+```{python load data, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# LOAD DATA
+molecular_descriptors = pd.read_csv(train_path + molecular_descriptors_training_file)
+X = molecular_descriptors.drop(columns=["activity"])
+Y = molecular_descriptors["activity"]
+```
+
+```{python}
+# FILTER COLUMNS WITH PEARSON CORRELATION GREATER THAN 0.9
+molecules_corr_filter = st.pearson_corr_filter(X, 0.9)
+X.drop(columns=molecules_corr_filter, inplace=True)
+```
+
+```{python}
+# REMOVE VARIABLES WITH LOW VARIANCE
+molecules_low_var_filter = st.low_variance_filter(X, 0.1)
+X = X[molecules_low_var_filter]
+```
+
+```{python}
+# MIN-MAX SCALER
+scaler = MinMaxScaler()
+X = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
+```
+
+```{python}
+# CONCATENATE X AND Y
+molecular_descriptors = pd.concat([X, Y], axis=1)
+# SAVE DATA
+molecular_descriptors.to_csv(
+    train_path + "molecular_descriptors_training.csv", index=False
+)
+```
+
+```{python}
+# WE DO THE SAME WITH THE TEST DATA
+molecular_descriptors_test = pd.read_csv(test_path + molecular_descriptors_test_file)
+molecular_descriptors_test = molecular_descriptors_test[molecular_descriptors.columns]
+# MIN-MAX SCALER FOR X TEST
+molecular_descriptors_test[X.columns] = pd.DataFrame(
+    scaler.transform(molecular_descriptors_test[X.columns]), columns=X.columns
+)
+molecular_descriptors_test.to_csv(
+    test_path + "molecular_descriptors_test.csv", index=False
+)
+```
+

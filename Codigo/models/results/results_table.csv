@@ -1,0 +1,16 @@
+model_name,accuracy,precision,recall,auc,auc_train
+k-NN Molecular Descriptors,0.46,0.0,0.0,0.5,0.0
+k-NN MACCS keys,0.56,0.67,0.31,0.57,0.96
+k-NN ECFP4 fingerprints,0.58,0.58,0.69,0.58,0.99
+Naive Bayes Molecular Descriptors,0.46,0.0,0.0,0.5,0.53
+Naive Bayes MACCS Keys,0.6,0.57,0.92,0.59,0.65
+Naive Bayes ECFP4 Fingerprints,0.74,0.74,0.77,0.74,0.75
+SVM Molecular Descriptors,0.46,0.0,0.0,0.5,0.98
+SVM MACCS Keys,0.6,0.59,0.73,0.59,0.8
+SVM ECFP4,0.66,0.66,0.73,0.66,0.99
+XGBOOST Molecular Descriptors,0.68,0.67,0.81,0.67,0.96
+XGBOOST MACCS Keys,0.74,0.74,0.77,0.74,0.78
+XGBOOST ECFP4,0.66,0.74,0.54,0.67,0.69
+Random Forest Molecular Descriptors,0.46,0.0,0.0,0.5,0.92
+Random Forest MACCS Keys,0.68,0.65,0.85,0.67,0.64
+Random Forest ECFP4,0.62,0.61,0.73,0.62,0.81

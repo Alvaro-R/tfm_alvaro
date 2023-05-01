@@ -1,0 +1,128 @@
+---
+title: "Preliminary models"
+---
+
+```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pycaret.classification import *
+
+# IMPORT CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+import utils.stats as st
+
+```
+
+```{python paths, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# DIRECTORIES
+input_path = "../data/processed/"
+train_path = "../data/processed/train_data/"
+test_path = "../data/processed/test_data/"
+# FILES
+# MOLECULAR DESCRIPTORS
+molecular_descriptors_training_file = "molecular_descriptors_training.csv"
+molecular_descriptors_test_file = "molecular_descriptors_test.csv"
+# MACCS KEYS
+maccs_keys_training_file = "maccs_keys_training.csv"
+maccs_keys_test_file = "maccs_keys_test.csv"
+# ECFP4 FINGERPRINTS
+ecfp4_fingerprints_training_file = "ecfp4_fingerprints_training.csv"
+ecfp4_fingerprints_test_file = "ecfp4_fingerprints_test.csv"
+```
+
+```{python load data, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# LOAD DATA
+# MOLECULAR DESCRIPTORS
+## TRAINING
+molecular_descriptors_training = pd.read_csv(
+    train_path + molecular_descriptors_training_file
+)
+X_training_molecular_descriptors = molecular_descriptors_training.drop(
+    columns=["activity"]
+)
+Y_training_molecular_descriptors = molecular_descriptors_training["activity"]
+## TEST
+molecular_descriptors_test = pd.read_csv(test_path + molecular_descriptors_test_file)
+X_test_molecular_descriptors = molecular_descriptors_test.drop(columns=["activity"])
+Y_test_molecular_descriptors = molecular_descriptors_test["activity"]
+# MACCS KEYS
+## TRAINING
+macc_keys_training = pd.read_csv(train_path + maccs_keys_training_file)
+X_training_maccs_keys = macc_keys_training.drop(columns=["activity"])
+Y_training_maccs_keys = macc_keys_training["activity"]
+## TEST
+macc_keys_test = pd.read_csv(test_path + maccs_keys_test_file)
+X_test_maccs_keys = macc_keys_test.drop(columns=["activity"])
+Y_test_maccs_keys = macc_keys_test["activity"]
+# ECFP4 FINGERPRINTS
+## TRAINING
+ecfp4_fingerprints_training = pd.read_csv(train_path + ecfp4_fingerprints_training_file)
+X_training_ecfp4_fingerprints = ecfp4_fingerprints_training.drop(columns=["activity"])
+Y_training_ecfp4_fingerprints = ecfp4_fingerprints_training["activity"]
+## TEST
+ecfp4_fingerprints_test = pd.read_csv(test_path + ecfp4_fingerprints_test_file)
+X_test_ecfp4_fingerprints = ecfp4_fingerprints_test.drop(columns=["activity"])
+Y_test_ecfp4_fingerprints = ecfp4_fingerprints_test["activity"]
+```
+
+# PRELIMINARY MODELS
+
+## MOLECULAR DESCRIPTORS
+
+```{python}
+# CREATE MODELS WITH PYCARET
+molecular_descriptors_models = setup(
+    data=molecular_descriptors_training,
+    target="activity",
+    test_data=molecular_descriptors_test,
+    session_id=123,
+)
+```
+
+```{python}
+# COMPARE MODELS
+best_model = compare_models(verbose=True)
+```
+
+```{python}
+# TUNE MODELS
+# tuned_molecular_descriptors_models = tune_model(best_model, optimize="AUC", n_iter=100)
+```
+
+## MACCS KEYS
+
+```{python}
+# CREATE MODELS WITH PYCARET
+maccs_keys_models = setup(
+    data=macc_keys_training,
+    target="activity",
+    test_data=macc_keys_test,
+    session_id=123,
+)
+```
+    
+```{python}
+# COMPARE MODELS
+compare_models(verbose=True)
+```
+
+## ECFP4 FINGERPRINTS
+
+```{python}
+# CREATE MODELS WITH PYCARET
+ecfp4_fingerprints_models = setup(
+    data=ecfp4_fingerprints_training,
+    target="activity",
+    test_data=ecfp4_fingerprints_test,
+    session_id=123,
+)
+```
+
+```{python}
+# COMPARE MODELS
+compare_models(verbose=True)
+```

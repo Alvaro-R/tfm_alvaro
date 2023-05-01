@@ -1,0 +1,195 @@
+---
+title: "Traing and test molecules splitting"
+---
+
+```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import kennard_stone as ks
+import seaborn as sns
+import sklearn as sk
+import sklearn.decomposition as skd
+import sklearn.manifold as skm
+
+# IMPORT CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+import utils.stats as st
+
+```
+
+```{python paths, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# DIRECTORIRES
+input_path = "../data/processed/"
+training_path = "../data/processed/train_data/"
+test_path = "../data/processed/test_data/"
+figure_path = "../../Memoria/figures/"
+# FILES
+molecular_descriptors_file = "CHEMBL4523954_descriptors.csv"
+maccs_keys_file = "macc_keys.csv"
+ecfp4_file = "ecfp4_fingerprints.csv"
+```
+
+```{python load molecules, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# LOAD DATA
+molecular_descriptors = pd.read_csv(input_path + molecular_descriptors_file)
+maccs_keys = pd.read_csv(input_path + maccs_keys_file)
+ecfp4 = pd.read_csv(input_path + ecfp4_file)
+```
+
+# TRAINING AND TEST DATA SPLITTING
+
+Data leakage is a problem that occurs when information about the target variable is unintentionally transferred to the training molecules. This can lead to overfitting and inaccurate models. In this case, to prevent this to happen, the splitting of molecules into training and test will be done previous to any molecules processing such feature selection or scaling.
+
+Rather than splitting molecules randomly, the Kennard-Stone algorithm will be used to split the molecules so have a representation of all features will be present in both training and test molecules.
+
+```{python split molecules, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# SPLIT TEST AND TRAINING DATA USING KENNARD-STONE ALGORITHM
+training, test = ks.train_test_split(
+    molecular_descriptors, test_size=0.2, random_state=42
+)
+```
+
+```{python}
+# SAVE TRAINING AND TEST INDEXES
+training_index = training.index
+test_index = test.index
+```
+
+```{python}
+# SPLIT MACCS KEYS DATA
+maccs_keys_training = maccs_keys.loc[training_index]
+maccs_keys_test = maccs_keys.loc[test_index]
+```
+
+```{python}
+# SPLIT ECFP4 DATA
+ecfp4_training = ecfp4.loc[training_index]
+ecfp4_test = ecfp4.loc[test_index]
+```
+
+```{python}
+# SAVE TRAINING AND TEST DATA
+# MOLECULAR DESCRIPTORS
+training.to_csv(training_path + "molecular_descriptors_training.csv", index=False)
+test.to_csv(test_path + "molecular_descriptors_test.csv", index=False)
+# MACCS KEYS
+maccs_keys_training.to_csv(training_path + "maccs_keys_training.csv", index=False)
+maccs_keys_test.to_csv(test_path + "maccs_keys_test.csv", index=False)
+# ECFP4 FINGERPRINTS
+ecfp4_training.to_csv(training_path + "ecfp4_fingerprints_training.csv", index=False)
+ecfp4_test.to_csv(test_path + "ecfp4_fingerprints_test.csv", index=False)
+```
+
+# TRAINING AND TEST DATA CHEMICAL SPACE AND SIMILARITY
+
+```{python}
+# CREATE COLUMN TRAINING
+training["training"] = 1
+test["training"] = 0
+# CONCATENATE TRAINING AND TEST DATA
+molecules = pd.concat([training, test])
+```
+
+
+```{python}
+# CALCULATE PCA FOR MOLECULAR DESCRIPTORS
+pca = skd.PCA(n_components=3)
+pca.fit(molecules.drop(["activity"], axis=1))
+molecules_pca = pd.DataFrame(pca.transform(molecules.drop(["activity"], axis=1)))
+```
+
+```{python}
+# REPRESENTATION OF 2D PCA
+plt.figure(figsize=(10, 10))
+plt.scatter(
+    molecules_pca[0],
+    molecules_pca[1],
+    c=molecules["training"],
+    cmap="coolwarm",
+    alpha=0.5,
+    s=100,
+)
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.title("PCA analysis")
+plt.legend(
+    ["Training", "Test"], loc="upper left", fontsize=12, markerscale=2, frameon=True
+)
+plt.savefig("../../Memoria/figures/PCA_analysis_splitting.png", dpi=300)
+plt.show()
+```
+
+
+```{python}
+# REPRESENTATION OF 3D PCA
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(
+    molecules_pca[0],
+    molecules_pca[1],
+    molecules_pca[2],
+    c=molecules["training"],
+    cmap="coolwarm",
+    alpha=0.5,
+    s=100,
+)
+ax.set_xlabel("PC1")
+ax.set_ylabel("PC2")
+ax.set_zlabel("PC3")
+ax.set_title("PCA analysis")
+ax.legend(
+    ["Training", "Test"], loc="upper left", fontsize=12, markerscale=2, frameon=True
+)
+plt.savefig("../../Memoria/figures/PCA_analysis_splitting_3D.png", dpi=300)
+plt.show()
+```
+
+# t-SNE ANALYSIS OF MOLECULAR DESCRIPTORS
+
+```{python}
+# CALCULATE t-SNE FOR MOLECULAR DESCRIPTORS
+tsne = skm.TSNE(n_components=3)
+molecules_tsne = pd.DataFrame(tsne.fit_transform(molecules.drop(["activity"], axis=1)))
+```
+
+```{python}
+# REPRESENTATION OF 2D t-SNE
+plt.figure(figsize=(10, 10))
+plt.scatter(
+    molecules_tsne[0],
+    molecules_tsne[1],
+    c=molecules["activity"],
+    cmap="RdYlGn",
+    alpha=0.5,
+)
+plt.xlabel("t-SNE1")
+plt.ylabel("t-SNE2")
+plt.legend(["Active", "Inactive"])
+plt.savefig(figure_path + "tsne2D_splitting.png")
+plt.show()
+```
+
+```{python}
+# REPRESENTATION OF 3D t-SNE
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(
+    molecules_tsne[0],
+    molecules_tsne[1],
+    molecules_tsne[2],
+    c=molecules["activity"],
+    cmap="RdYlGn",
+    alpha=0.5,
+)
+ax.set_xlabel("t-SNE1")
+ax.set_ylabel("t-SNE2")
+ax.set_zlabel("t-SNE3")
+plt.legend(["Active", "Inactive"])
+plt.savefig(figure_path + "tsne3D_splitting.png")
+plt.show()
+```
+
+
