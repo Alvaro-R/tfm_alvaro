@@ -1,36 +1,33 @@
 ---
-title: "Molecular descriptors and Fingerprints"
+title: "Molecular descriptors and Fingerprints calculation"
 ---
 
-```{python import libraries, include=FALSE}
+```{python import libraries}
+# PATH TO CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+
+# IMPORT LIBRARIES
 import pandas as pd
 import numpy as np
 
 # IMPORT CUSTOM MODULES
-import sys
-
-sys.path.append("../src")
-import utils.molUtils as molUtils
-from utils.molUtils import *
+import utils.moleculesUtils as moleculesUtils
+from utils.moleculesUtils import *
 
 ```
 
-# DATA PREPARATION
-
-## LOAD DATA
-
-First, we load the data obtained from CHEMBL database through the API. The data is stored in a csv file called `chembl_data.csv`. The data will be loaded into a pandas dataframe called `molecules`.
-
-```{python path, include=TRUE}
+```{python paths}
 # DIRECTORIES
 input_path = "../data/raw/"
-output_path = "../data/processed/"
+output_path = "../data/raw/"
 # FILES
 input_file = "CHEMBL4523954_raw.csv"
 ```
 
-```{python load data, include=TRUE}
-# LOAD DATA INTO A PANDAS DATAFRAME
+```{python load data}
+# LOAD DATA
 molecules = pd.read_csv(input_path + input_file)
 ```
 
@@ -40,8 +37,7 @@ A first descption of the dataset is obtained where the number of rows and column
 
 The dataset has 
 
-```{python dataset dimension, include=TRUE}
-# NUMBER OF ROWS AND COLUMNS
+```{python dataset dimension}
 print(
     "The dataset has "
     + str(molecules.shape[0])
@@ -51,19 +47,19 @@ print(
 )
 ```
 
-```{python}
+```{python dataset column names}
 # DATASET COLUMN NAMES
 print("The columns of the dataset are:")
 print(molecules.columns)
 ```
 
-```{python}
+```{python dataset data types}
 # NUMBER OF COLUMNS PER DATA TYPE
 print("The dataset has:")
 print(molecules.dtypes.value_counts())
 ```
 
-```{python}
+```{python unique values columns}
 # COLUMNS THAT HAVE ALL UNIQUE VALUES
 print("The columns that have all unique values are:")
 print(molecules.columns[molecules.nunique() == molecules.shape[0]])
@@ -75,29 +71,28 @@ print("The columns that have the same value are:")
 print(molecules.columns[molecules.nunique() == 1])
 ```
 
+## REMOVE DUPLICATES
+
+```{python remove duplicates}
+# REMOVE DUPLICATES
+molecules = molecules.drop_duplicates(subset=["molecule_chembl_id"], ignore_index=True)
+```
+
 ## REMOVE UNNECESSARY COLUMNS
-
-In order to calculate molecular descriptors and fingerprints, the SMILES strings of the molecules will be used, which are stored in the column `canonical_smiles`. Besides this information, the column standard_value will be used to calculate the activity of the molecules and then it will be needed in further analysis. The standard_value column contains the activity of the molecules in nM units. The activity will be calculated as the inverse of the standard_value, which will be stored in a new column called `activity`.
-
-Other than these columns, the rest of the columns will be removed.
 
 ```{python remove unnecessary columns, include=TRUE}
 # REMOVE UNNECESSARY COLUMNS
 molecules = molecules[["canonical_smiles", "standard_value"]]
 ```
 
-Having removed the unnecessary columns, calculation of molecular descriptors and fingerprints that will be used in the models construction can be performed.
-
 ## DEFINE ACTIVE AND INACTIVE MOLECULES
-
-In order to define wether a molecule is active or inactive the standard value of the molecule will be taken inot account. First, the median will be calculated and the molecules with a standard value lower than the median will be considered active, while the molecules with a standard value higher than the median will be considered inactive.
 
 ```{python standard value median, include=TRUE}
 # CALCULATE STANDARD VALUE MEDIAN
 standard_value_median = molecules["standard_value"].median()
 ```
 
-```{python}
+```{python define active and inactive molecules}
 # DEFINE ACTIVE AND INACTIVE MOLECULES
 molecules["activity"] = np.where(
     molecules["standard_value"] < standard_value_median, 1, 0
@@ -118,34 +113,31 @@ After literature review, the following molecular descriptors and fingerprints we
 - MACCS keys (MACCS)
 - Extended connectivity fingerprints (ECFP)
 
-```{python}
-# GET REPRESENTATION OF OF FIRST MOLECULE WITH RDKit
-molecule = Chem.MolFromSmiles(molecules["canonical_smiles"][0])
-molecule_b = Chem.MolFromSmiles(molecules["canonical_smiles"][1])
-```
-
 ## MOLECULAR DESCRIPTORS
 
-```{python}
+```{python calculate molecular descriptors}
 # CALCULATE MOLECULAR DESCRIPTORS
-molecular_descriptors = molUtils.calculate_molecule_set(
-    molecules, "canonical_smiles", calculate_molecular_descriptors
+molecular_descriptors = moleculesUtils.calculate_molecule_set(
+    smiles_set=molecules,
+    smiles_column="canonical_smiles",
+    function=calculate_molecular_descriptors,
 )
-
 ```
 
 ## FINGERPRINTS
 
-```{python}
+```{python calculate MACCS keys}
 # CALCULATE MACC KEYS
-macc_keys = molUtils.calculate_molecule_set(
-    molecules, "canonical_smiles", calculate_maccs_keys
+macc_keys = moleculesUtils.calculate_molecule_set(
+    smiles_set=molecules,
+    smiles_column="canonical_smiles",
+    function=calculate_maccs_keys,
 )
 ```
 
-```{python}
+```{python calculate ECFP4 fingerprints}
 # CALCULATE ECFP FINGERPRINTS
-ecfp4_fingerprints = molUtils.calculate_molecule_set(
+ecfp4_fingerprints = moleculesUtils.calculate_molecule_set(
     molecules, "canonical_smiles", calculate_ecfp4_fingerprints
 )
 ```
@@ -157,7 +149,7 @@ The data obtained from the calculation of molecular descriptors and fingerprints
 
 In total, there will be one dataframe for each type of molecular descriptor and fingerprint. Each of them will count with the SMILES string of the molecules and the corresponding standard value that represents the activity of the molecules. The SMILES can be seen as ID of the molecules and it will be removed in further analysis.
 
-```{python}
+```{python remove smiles and standard value columns}
 # REMOVE SMILES AND STANDARD VALUE COLUMNS FROM ALL DATAFRAMES
 molecules = molecules.drop(["standard_value"], axis=1)
 molecular_descriptors = molecular_descriptors.drop(
@@ -169,7 +161,7 @@ ecfp4_fingerprints = ecfp4_fingerprints.drop(
 )
 ```
 
-```{python}
+```{python save data}
 # SAVE CHEMBL DATA
 molecules.to_csv(output_path + "smiles_activity.csv", index=False)
 # SAVE MOLECULAR DESCRIPTORS

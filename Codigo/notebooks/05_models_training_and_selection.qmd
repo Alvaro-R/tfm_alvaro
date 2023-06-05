@@ -1,0 +1,275 @@
+---
+title: "Models training and selection"
+---
+
+```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# PATH TO CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+
+# IMPORT LIBRARIES
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# MODELS
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import AdaBoostClassifier
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import (
+    roc_curve,
+    auc,
+    roc_auc_score,
+    confusion_matrix,
+    classification_report,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    precision_recall_curve,
+    average_precision_score,
+)
+
+import glob
+import os
+
+# IMPORT CUSTOM MODULES
+import utils.loadDataUtils as ldu
+import utils.modelsUtils as mu
+
+```
+
+```{python paths}
+# DIRECTORIES
+input_path = "../data/processed/"
+
+training_path = input_path + "train_data/"
+test_path = input_path + "test_data/"
+
+results_path = "../models/results/"
+figures_path = "../../Memoria/figures/"
+```
+
+```{python files}
+# FILES
+results_file = "results_table.csv"
+```
+
+```{python load data}
+# GET TRAINING AND TEST CSV FILES
+training_csv_files = ldu.get_csv_files(training_path)
+test_csv_files = ldu.get_csv_files(test_path)
+
+# GET DATASET NAMES FROM CSV FILES
+dataset_names = ldu.get_dataset_names(training_csv_files)
+
+# LOAD TRAINING AND TEST DATA
+datasets = ldu.load_training_test_datasets(
+    datasets_names=dataset_names, training_path=training_path, test_path=test_path
+)
+
+```
+
+# CALCULATE MODELS FOR EACH DATASET
+
+## GLOBAL VARIABLES
+
+```{python global variables}
+parameters_grids = list()
+moldel_names = list()
+```
+
+### KNN PARAMETERS GRID
+
+```{python knn parameters grid}
+k_range = range(1, 101, 10)
+distance_range = ["euclidean", "minkowski", "manhattan", "chebyshev", "jaccard"]
+k_weight_range = ["uniform", "distance"]
+parameters_grid_knn = dict(
+    n_neighbors=k_range, metric=distance_range, weights=k_weight_range
+)
+model_name = "k-NN"
+
+parameters_grids.append(parameters_grid_knn)
+moldel_names.append(model_name)
+```
+
+### NAIIVE BAYES PARAMETERS GRID
+
+```{python naive bayes parameters grid}
+nb_var_smoothing = np.logspace(0, -9, num=100)
+parameters_grid_naive_bayes = dict(
+    var_smoothing=nb_var_smoothing,
+)
+model_name = "Naive_Bayes"
+
+parameters_grids.append(parameters_grid_naive_bayes)
+moldel_names.append(model_name)
+```
+
+### SVM PARAMETERS GRID
+
+```{python svm parameters grid}
+parameters_grid_svm = {
+    "kernel": ["linear", "poly", "rbf", "sigmoid"],
+    "C": [0.1, 1, 10, 100, 1000],
+    "gamma": [1, 0.1, 0.01, 0.001, 0.0001],
+}
+model_name = "SVM"
+
+parameters_grids.append(parameters_grid_svm)
+moldel_names.append(model_name)
+```
+
+### RANDOM FOREST PARAMETERS GRID
+
+```{python random forest parameters grid}
+parameters_grid_random_forest = {
+    "n_estimators": [10, 50, 100],
+    "max_depth": [5, 10, 50],
+    "min_samples_split": [5, 10, 20],
+    "min_samples_leaf": [5, 10, 50],
+    "max_features": ["sqrt", "log2"],
+}
+model_name = "Random_Forest"
+
+parameters_grids.append(parameters_grid_random_forest)
+moldel_names.append(model_name)
+```
+
+### XGBOOST PARAMETERS GRID
+
+```{python xgboost parameters grid}
+xgboost_n_estimators = [1, 10, 50, 100]
+xgboost_max_depth = [3, 5, 10]
+xgboost_learning_rate = [0.01, 0.1]
+xgboost_gamma = [0, 0.1, 0.4]
+xgboost_colsample_bytree = [0.3]
+xgboost_subsample = [0.3]
+xgboost_reg_alpha = [0, 0.1]
+xgboost_reg_lambda = [0.1]
+
+parameters_grid_xgboost = {
+    "n_estimators": [10, 50, 100],
+    "max_depth": [5, 10, 50],
+    "min_samples_split": [5, 10, 20],
+    "min_samples_leaf": [5, 10, 50],
+    "max_features": ["sqrt", "log2"],
+}
+model_name = "XGBoost"
+
+parameters_grids.append(parameters_grid_xgboost)
+moldel_names.append(model_name)
+```
+
+```{python parameters grid logist regression}
+parameters_grid_logistic_regression = {
+    "penalty": ["l1", "l2", "elasticnet", "none"],
+    "C": [0.1, 1, 10, 100, 1000],
+    "solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
+    "max_iter": [100, 1000, 2500, 5000],
+}
+model_name = "Logistic_Regression"
+
+parameters_grids.append(parameters_grid_logistic_regression)
+moldel_names.append(model_name)
+```
+
+```{python parameters grid ada boost}
+parameters_grid_ada_boost = {
+    "n_estimators": [10, 50, 100],
+    "learning_rate": [0.01, 0.1, 1],
+    "algorithm": ["SAMME", "SAMME.R"],
+}
+model_name = "Ada_Boost"
+
+parameters_grids.append(parameters_grid_ada_boost)
+moldel_names.append(model_name)
+```
+
+
+## INSTANTIATE MODELS
+
+```{python instantiate models}
+models = list()
+
+knn_model = KNeighborsClassifier()
+models.append(knn_model)
+
+naive_bayes_model = GaussianNB()
+models.append(naive_bayes_model)
+
+svm_model = SVC()
+models.append(svm_model)
+
+random_forest_model = RandomForestClassifier()
+models.append(random_forest_model)
+
+xgboost_model = XGBClassifier()
+models.append(xgboost_model)
+
+logistic_regression_model = LogisticRegression()
+models.append(logistic_regression_model)
+
+ada_boost_model = AdaBoostClassifier()
+models.append(ada_boost_model)
+
+```
+
+## BUILD KNN MODELS
+
+```{python calculate knn model}
+
+models_results = dict()
+
+for i in range(len(models)):
+    model = models[i]
+    parameters_grid = parameters_grids[i]
+    model_name = moldel_names[i]
+
+    model_results = mu.calculate_models(
+        model=model,
+        parameters_grid=parameters_grid,
+        datasets=datasets,
+        model_name=model_name,
+    )
+
+    results = model_results[0]
+    roc_curves = model_results[1]
+
+    # OPEN FILE
+    file = open(results_path + results_file, "a")
+    # REMOVE ROWS IN TABLE_RESULTS.CSV THAT STARTS WITH k-NN
+    table_results = pd.read_csv(results_path + results_file)
+    table_results = table_results[
+        ~table_results["model_name"].str.startswith(model_name)
+    ]
+    table_results.to_csv(results_path + results_file, index=False)
+    # WRITE RESULTS
+    results.to_csv(file, header=False, index=False)
+    # CLOSE FILE
+    file.close()
+
+    models_results[model_name] = roc_curves
+
+```
+
+# RESULTS
+
+```{python}
+# PLOT ROC CURVES
+for model in models_results:
+    roc_curves = models_results[model]
+    roc_curve = mu.plot_all_roc_curves(
+        roc_curves=roc_curves, model_name=model, figure_path=figures_path, save=True
+    )
+```

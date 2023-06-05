@@ -104,7 +104,7 @@ maccs_keys_models = setup(
     session_id=123,
 )
 ```
-    
+
 ```{python}
 # COMPARE MODELS
 compare_models(verbose=True)

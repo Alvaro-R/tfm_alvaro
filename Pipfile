@@ -27,6 +27,17 @@ scikit-learn = "*"
 pycaret = "*"
 lightgbm = "*"
 kennard-stone = "*"
+xgboost = "*"
+sklearn-genetic = "*"
+setuptools = "*"
+numpy = "*"
+optuna = "*"
+deepchem = "*"
+tensorflow = "*"
+keras = "*"
+simpletransformers = "*"
+torch = "*"
+jupyter-cache = "*"
 
 [dev-packages]
 

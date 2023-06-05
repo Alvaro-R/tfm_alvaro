@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es-ES" xml:lang="es-ES"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.2.475">
@@ -7,11 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Álvaro Román Gómez">
-<meta name="dcterms.date" content="2023-05-01">
-<meta name="keywords" content="Apuntes de clase">
-<meta name="description" content="Apuntes de clase">
+<meta name="dcterms.date" content="2023-05-29">
 
-<title>Molecular descriptors and Fingerprints</title>
+<title>Molecular descriptors and Fingerprints calculation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -109,22 +107,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
   <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Tabla de contenidos</h2>
+    <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link active" data-scroll-target="#data-preparation"><span class="toc-section-number">1</span>  DATA PREPARATION</a>
+  <li><a href="#dataset-description" id="toc-dataset-description" class="nav-link active" data-scroll-target="#dataset-description"><span class="toc-section-number">0.1</span>  DATASET DESCRIPTION</a></li>
+  <li><a href="#remove-duplicates" id="toc-remove-duplicates" class="nav-link" data-scroll-target="#remove-duplicates"><span class="toc-section-number">0.2</span>  REMOVE DUPLICATES</a></li>
+  <li><a href="#remove-unnecessary-columns" id="toc-remove-unnecessary-columns" class="nav-link" data-scroll-target="#remove-unnecessary-columns"><span class="toc-section-number">0.3</span>  REMOVE UNNECESSARY COLUMNS</a></li>
+  <li><a href="#define-active-and-inactive-molecules" id="toc-define-active-and-inactive-molecules" class="nav-link" data-scroll-target="#define-active-and-inactive-molecules"><span class="toc-section-number">0.4</span>  DEFINE ACTIVE AND INACTIVE MOLECULES</a></li>
+  <li><a href="#calculate-molecular-descriptors-and-fingerprints" id="toc-calculate-molecular-descriptors-and-fingerprints" class="nav-link" data-scroll-target="#calculate-molecular-descriptors-and-fingerprints"><span class="toc-section-number">1</span>  CALCULATE MOLECULAR DESCRIPTORS AND FINGERPRINTS</a>
   <ul>
-  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data"><span class="toc-section-number">1.1</span>  LOAD DATA</a></li>
-  <li><a href="#dataset-description" id="toc-dataset-description" class="nav-link" data-scroll-target="#dataset-description"><span class="toc-section-number">1.2</span>  DATASET DESCRIPTION</a></li>
-  <li><a href="#remove-unnecessary-columns" id="toc-remove-unnecessary-columns" class="nav-link" data-scroll-target="#remove-unnecessary-columns"><span class="toc-section-number">1.3</span>  REMOVE UNNECESSARY COLUMNS</a></li>
-  <li><a href="#define-active-and-inactive-molecules" id="toc-define-active-and-inactive-molecules" class="nav-link" data-scroll-target="#define-active-and-inactive-molecules"><span class="toc-section-number">1.4</span>  DEFINE ACTIVE AND INACTIVE MOLECULES</a></li>
+  <li><a href="#molecular-descriptors" id="toc-molecular-descriptors" class="nav-link" data-scroll-target="#molecular-descriptors"><span class="toc-section-number">1.1</span>  MOLECULAR DESCRIPTORS</a></li>
+  <li><a href="#fingerprints" id="toc-fingerprints" class="nav-link" data-scroll-target="#fingerprints"><span class="toc-section-number">1.2</span>  FINGERPRINTS</a></li>
   </ul></li>
-  <li><a href="#calculate-molecular-descriptors-and-fingerprints" id="toc-calculate-molecular-descriptors-and-fingerprints" class="nav-link" data-scroll-target="#calculate-molecular-descriptors-and-fingerprints"><span class="toc-section-number">2</span>  CALCULATE MOLECULAR DESCRIPTORS AND FINGERPRINTS</a>
-  <ul>
-  <li><a href="#molecular-descriptors" id="toc-molecular-descriptors" class="nav-link" data-scroll-target="#molecular-descriptors"><span class="toc-section-number">2.1</span>  MOLECULAR DESCRIPTORS</a></li>
-  <li><a href="#fingerprints" id="toc-fingerprints" class="nav-link" data-scroll-target="#fingerprints"><span class="toc-section-number">2.2</span>  FINGERPRINTS</a></li>
-  </ul></li>
-  <li><a href="#save-data" id="toc-save-data" class="nav-link" data-scroll-target="#save-data"><span class="toc-section-number">3</span>  SAVE DATA</a></li>
+  <li><a href="#save-data" id="toc-save-data" class="nav-link" data-scroll-target="#save-data"><span class="toc-section-number">2</span>  SAVE DATA</a></li>
   </ul>
 </nav>
 </div>
@@ -132,30 +127,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Molecular descriptors and Fingerprints</h1>
-<p class="subtitle lead">Apuntes de clase</p>
+<h1 class="title">Molecular descriptors and Fingerprints calculation</h1>
 </div>
 
-<div>
-  <div class="description">
-    Apuntes de clase
-  </div>
-</div>
 
 
 <div class="quarto-title-meta">
 
     <div>
-    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
              <p>Álvaro Román Gómez </p>
           </div>
   </div>
     
     <div>
-    <div class="quarto-title-meta-heading">Fecha de publicación</div>
+    <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 1, 2023</p>
+      <p class="date">May 29, 2023</p>
     </div>
   </div>
   
@@ -166,46 +155,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </header>
 
 <div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PATH TO CUSTOM MODULES</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># IMPORT CUSTOM MODULES</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sys.path.append(<span class="st">"../src"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils.molUtils <span class="im">as</span> molUtils</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> utils.molUtils <span class="im">import</span> <span class="op">*</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sys.path.append(<span class="st">"../src"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># IMPORT LIBRARIES</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># IMPORT CUSTOM MODULES</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils.moleculesUtils <span class="im">as</span> moleculesUtils</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> utils.moleculesUtils <span class="im">import</span> <span class="op">*</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="data-preparation" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> DATA PREPARATION</h1>
-<section id="load-data" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="load-data"><span class="header-section-number">1.1</span> LOAD DATA</h2>
-<p>First, we load the data obtained from CHEMBL database through the API. The data is stored in a csv file called <code>chembl_data.csv</code>. The data will be loaded into a pandas dataframe called <code>molecules</code>.</p>
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DIRECTORIES</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>input_path <span class="op">=</span> <span class="st">"../data/raw/"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>output_path <span class="op">=</span> <span class="st">"../data/processed/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>output_path <span class="op">=</span> <span class="st">"../data/raw/"</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FILES</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>input_file <span class="op">=</span> <span class="st">"CHEMBL4523954_raw.csv"</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>input_file <span class="op">=</span> <span class="st">"CHEMBL4523954_raw.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># LOAD DATA INTO A PANDAS DATAFRAME</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>molecules <span class="op">=</span> pd.read_csv(input_path <span class="op">+</span> input_file)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># LOAD DATA</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>molecules <span class="op">=</span> pd.read_csv(input_path <span class="op">+</span> input_file)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="dataset-description" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="dataset-description"><span class="header-section-number">1.2</span> DATASET DESCRIPTION</h2>
+<section id="dataset-description" class="level2" data-number="0.1">
+<h2 data-number="0.1" class="anchored" data-anchor-id="dataset-description"><span class="header-section-number">0.1</span> DATASET DESCRIPTION</h2>
 <p>A first descption of the dataset is obtained where the number of rows and columns is shown, as well as the names of the columns. Also, the data types of the columns will be shown:</p>
 <p>The dataset has</p>
 <div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># NUMBER OF ROWS AND COLUMNS</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The dataset has "</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="bu">str</span>(molecules.shape[<span class="dv">0</span>])</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="st">" rows and "</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="bu">str</span>(molecules.shape[<span class="dv">1</span>])</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="st">" columns."</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The dataset has "</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="bu">str</span>(molecules.shape[<span class="dv">0</span>])</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="st">" rows and "</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="bu">str</span>(molecules.shape[<span class="dv">1</span>])</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> <span class="st">" columns."</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>The dataset has 299 rows and 45 columns.</code></pre>
 </div>
@@ -213,7 +198,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DATASET COLUMN NAMES</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The columns of the dataset are:"</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.columns)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>The columns of the dataset are:
 Index(['activity_comment', 'activity_id', 'activity_properties',
@@ -235,7 +220,7 @@ Index(['activity_comment', 'activity_id', 'activity_properties',
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># NUMBER OF COLUMNS PER DATA TYPE</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The dataset has:"</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.dtypes.value_counts())</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.dtypes.value_counts())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>The dataset has:
 object     27
@@ -247,7 +232,7 @@ dtype: int64</code></pre>
 <div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># COLUMNS THAT HAVE ALL UNIQUE VALUES</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The columns that have all unique values are:"</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.columns[molecules.nunique() <span class="op">==</span> molecules.shape[<span class="dv">0</span>]])</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.columns[molecules.nunique() <span class="op">==</span> molecules.shape[<span class="dv">0</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>The columns that have all unique values are:
 Index(['activity_id'], dtype='object')</code></pre>
@@ -256,7 +241,7 @@ Index(['activity_id'], dtype='object')</code></pre>
 <div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># COLUMNS THAT HAVE THE SAME VALUE</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The columns that have the same value are:"</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.columns[molecules.nunique() <span class="op">==</span> <span class="dv">1</span>])</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(molecules.columns[molecules.nunique() <span class="op">==</span> <span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>The columns that have the same value are:
 Index(['assay_type', 'bao_endpoint', 'data_validity_comment',
@@ -268,42 +253,44 @@ Index(['assay_type', 'bao_endpoint', 'data_validity_comment',
 </div>
 </div>
 </section>
-<section id="remove-unnecessary-columns" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="remove-unnecessary-columns"><span class="header-section-number">1.3</span> REMOVE UNNECESSARY COLUMNS</h2>
-<p>In order to calculate molecular descriptors and fingerprints, the SMILES strings of the molecules will be used, which are stored in the column <code>canonical_smiles</code>. Besides this information, the column standard_value will be used to calculate the activity of the molecules and then it will be needed in further analysis. The standard_value column contains the activity of the molecules in nM units. The activity will be calculated as the inverse of the standard_value, which will be stored in a new column called <code>activity</code>.</p>
-<p>Other than these columns, the rest of the columns will be removed.</p>
+<section id="remove-duplicates" class="level2" data-number="0.2">
+<h2 data-number="0.2" class="anchored" data-anchor-id="remove-duplicates"><span class="header-section-number">0.2</span> REMOVE DUPLICATES</h2>
 <div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># REMOVE UNNECESSARY COLUMNS</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>molecules <span class="op">=</span> molecules[[<span class="st">"canonical_smiles"</span>, <span class="st">"standard_value"</span>]]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># REMOVE DUPLICATES</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>molecules <span class="op">=</span> molecules.drop_duplicates(subset<span class="op">=</span>[<span class="st">"molecule_chembl_id"</span>], ignore_index<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Having removed the unnecessary columns, calculation of molecular descriptors and fingerprints that will be used in the models construction can be performed.</p>
 </section>
-<section id="define-active-and-inactive-molecules" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="define-active-and-inactive-molecules"><span class="header-section-number">1.4</span> DEFINE ACTIVE AND INACTIVE MOLECULES</h2>
-<p>In order to define wether a molecule is active or inactive the standard value of the molecule will be taken inot account. First, the median will be calculated and the molecules with a standard value lower than the median will be considered active, while the molecules with a standard value higher than the median will be considered inactive.</p>
+<section id="remove-unnecessary-columns" class="level2" data-number="0.3">
+<h2 data-number="0.3" class="anchored" data-anchor-id="remove-unnecessary-columns"><span class="header-section-number">0.3</span> REMOVE UNNECESSARY COLUMNS</h2>
 <div class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CALCULATE STANDARD VALUE MEDIAN</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>standard_value_median <span class="op">=</span> molecules[<span class="st">"standard_value"</span>].median()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># REMOVE UNNECESSARY COLUMNS</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>molecules <span class="op">=</span> molecules[[<span class="st">"canonical_smiles"</span>, <span class="st">"standard_value"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="define-active-and-inactive-molecules" class="level2" data-number="0.4">
+<h2 data-number="0.4" class="anchored" data-anchor-id="define-active-and-inactive-molecules"><span class="header-section-number">0.4</span> DEFINE ACTIVE AND INACTIVE MOLECULES</h2>
 <div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DEFINE ACTIVE AND INACTIVE MOLECULES</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>molecules[<span class="st">"activity"</span>] <span class="op">=</span> np.where(</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    molecules[<span class="st">"standard_value"</span>] <span class="op">&lt;</span> standard_value_median, <span class="dv">1</span>, <span class="dv">0</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># COUNT ACTIVE AND INACTIVE MOLECULES</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The dataset has:"</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">str</span>(molecules[<span class="st">"activity"</span>].value_counts()[<span class="dv">1</span>]) <span class="op">+</span> <span class="st">" active molecules"</span>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">str</span>(molecules[<span class="st">"activity"</span>].value_counts()[<span class="dv">0</span>]) <span class="op">+</span> <span class="st">" inactive molecules"</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CALCULATE STANDARD VALUE MEDIAN</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>standard_value_median <span class="op">=</span> molecules[<span class="st">"standard_value"</span>].median()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DEFINE ACTIVE AND INACTIVE MOLECULES</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>molecules[<span class="st">"activity"</span>] <span class="op">=</span> np.where(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    molecules[<span class="st">"standard_value"</span>] <span class="op">&lt;</span> standard_value_median, <span class="dv">1</span>, <span class="dv">0</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># COUNT ACTIVE AND INACTIVE MOLECULES</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The dataset has:"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">str</span>(molecules[<span class="st">"activity"</span>].value_counts()[<span class="dv">1</span>]) <span class="op">+</span> <span class="st">" active molecules"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">str</span>(molecules[<span class="st">"activity"</span>].value_counts()[<span class="dv">0</span>]) <span class="op">+</span> <span class="st">" inactive molecules"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>The dataset has:
-149 active molecules
-150 inactive molecules</code></pre>
+141 active molecules
+143 inactive molecules</code></pre>
 </div>
 </div>
 </section>
-</section>
-<section id="calculate-molecular-descriptors-and-fingerprints" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> CALCULATE MOLECULAR DESCRIPTORS AND FINGERPRINTS</h1>
+<section id="calculate-molecular-descriptors-and-fingerprints" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> CALCULATE MOLECULAR DESCRIPTORS AND FINGERPRINTS</h1>
 <p>According to the literature, several moelcular descriptors and fingerprints have been used in the construction of models to predict the activity of molecules. The selection of these descriptors and fingerprints plays a key role in model performance. Sometimes, even more important than the model itself.</p>
 <p>After literature review, the following molecular descriptors and fingerprints were selected to be computed and therefore used in the models construction:</p>
 <ul>
@@ -311,38 +298,37 @@ Index(['assay_type', 'bao_endpoint', 'data_validity_comment',
 <li>MACCS keys (MACCS)</li>
 <li>Extended connectivity fingerprints (ECFP)</li>
 </ul>
-<div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># GET REPRESENTATION OF OF FIRST MOLECULE WITH RDKit</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>molecule <span class="op">=</span> Chem.MolFromSmiles(molecules[<span class="st">"canonical_smiles"</span>][<span class="dv">0</span>])</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>molecule_b <span class="op">=</span> Chem.MolFromSmiles(molecules[<span class="st">"canonical_smiles"</span>][<span class="dv">1</span>])</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<section id="molecular-descriptors" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="molecular-descriptors"><span class="header-section-number">2.1</span> MOLECULAR DESCRIPTORS</h2>
+<section id="molecular-descriptors" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="molecular-descriptors"><span class="header-section-number">1.1</span> MOLECULAR DESCRIPTORS</h2>
 <div class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CALCULATE MOLECULAR DESCRIPTORS</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>molecular_descriptors <span class="op">=</span> molUtils.calculate_molecule_set(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    molecules, <span class="st">"canonical_smiles"</span>, calculate_molecular_descriptors</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>molecular_descriptors <span class="op">=</span> moleculesUtils.calculate_molecule_set(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    smiles_set<span class="op">=</span>molecules,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    smiles_column<span class="op">=</span><span class="st">"canonical_smiles"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    function<span class="op">=</span>calculate_molecular_descriptors,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="fingerprints" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="fingerprints"><span class="header-section-number">2.2</span> FINGERPRINTS</h2>
+<section id="fingerprints" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="fingerprints"><span class="header-section-number">1.2</span> FINGERPRINTS</h2>
 <div class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CALCULATE MACC KEYS</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>macc_keys <span class="op">=</span> molUtils.calculate_molecule_set(</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    molecules, <span class="st">"canonical_smiles"</span>, calculate_maccs_keys</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>macc_keys <span class="op">=</span> moleculesUtils.calculate_molecule_set(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    smiles_set<span class="op">=</span>molecules,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    smiles_column<span class="op">=</span><span class="st">"canonical_smiles"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    function<span class="op">=</span>calculate_maccs_keys,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CALCULATE ECFP FINGERPRINTS</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>ecfp4_fingerprints <span class="op">=</span> molUtils.calculate_molecule_set(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>ecfp4_fingerprints <span class="op">=</span> moleculesUtils.calculate_molecule_set(</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    molecules, <span class="st">"canonical_smiles"</span>, calculate_ecfp4_fingerprints</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
-<section id="save-data" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> SAVE DATA</h1>
+<section id="save-data" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> SAVE DATA</h1>
 <p>The data obtained from the calculation of molecular descriptors and fingerprints will be saved in a csv file called <code>chembl_data.csv</code>.</p>
 <p>In total, there will be one dataframe for each type of molecular descriptor and fingerprint. Each of them will count with the SMILES string of the molecules and the corresponding standard value that represents the activity of the molecules. The SMILES can be seen as ID of the molecules and it will be removed in further analysis.</p>
 <div class="cell" data-execution_count="16">
@@ -354,7 +340,7 @@ Index(['assay_type', 'bao_endpoint', 'data_validity_comment',
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>macc_keys <span class="op">=</span> macc_keys.drop([<span class="st">"canonical_smiles"</span>, <span class="st">"standard_value"</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>ecfp4_fingerprints <span class="op">=</span> ecfp4_fingerprints.drop(</span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"canonical_smiles"</span>, <span class="st">"standard_value"</span>], axis<span class="op">=</span><span class="dv">1</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SAVE CHEMBL DATA</span></span>
@@ -364,7 +350,7 @@ Index(['assay_type', 'bao_endpoint', 'data_validity_comment',
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># SAVE MACCS KEYS</span></span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>macc_keys.to_csv(output_path <span class="op">+</span> <span class="st">"macc_keys.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># SAVE ECFP FINGERPRINTS</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>ecfp4_fingerprints.to_csv(output_path <span class="op">+</span> <span class="st">"ecfp4_fingerprints.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>ecfp4_fingerprints.to_csv(output_path <span class="op">+</span> <span class="st">"ecfp4_fingerprints.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 
@@ -410,12 +396,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // flash "checked"
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copiado");
+    button.setAttribute("title", "Copied!");
     let tooltip;
     if (window.bootstrap) {
       button.setAttribute("data-bs-toggle", "tooltip");
       button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copiado");
+      button.setAttribute("data-bs-title", "Copied!");
       tooltip = new bootstrap.Tooltip(button, 
         { trigger: "manual", 
           customClass: "code-copy-button-tooltip",

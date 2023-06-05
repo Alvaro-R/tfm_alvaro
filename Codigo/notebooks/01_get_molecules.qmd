@@ -1,12 +1,8 @@
 ---
-title: "Connection to CHEMBL database and get molecules for Zika virus"
+title: "Connection to CHEMBL database and active molecules for Zika virus collection"
 ---
 
-# IMPORT LIBRARIES
-
-[@adamRationalDevelopmentLiveAttenuated2023]
-
-```{python}
+```{python import libraries}
 # PATH TO CUSTOM MODULES
 import sys
 
@@ -21,32 +17,28 @@ import repository.chembl_api_connection as chembl
 
 ```
 
-# PATHS
-
-```{python}
-# PATHS TO SAVE DATA
+```{python paths}
+# DIRECTORIES
 data_path = "../data/raw/"
 ```
 
 # GET MOLECULES FOR ZIKA VIRUS
 
-```{python}
+```{python get zika virus target_id}
 # GET THE TARGET ID WITH MAXIMUM NUMBER OF IC50 MOLECULES FOR A GIVEN ORGANISM
 organism = "Zika virus"
 activity = "IC50"
 target_id = chembl.get_target_id_maximum_activity(organism, activity)
 ```
 
-```{python}
+```{python get molecules for zika virus target_id}
 # GET MOLECULES FOR TARGET ID AND ACTIVITY TYPE
 molecules = chembl.get_molecules_from_target_activity(target_id, activity)
 ```
 
 # SAVE MOLECULES TO CSV
 
-```{python}
+```{python save molecules to csv}
 # SAVE MOLECULES TO CSV
 molecules.to_csv(data_path + target_id + "_raw.csv", index=False)
 ```
-
-

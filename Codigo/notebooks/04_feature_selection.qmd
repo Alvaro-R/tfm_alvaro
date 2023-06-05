@@ -1,0 +1,292 @@
+---
+title: "Feature selection of molecular descriptors"
+---
+
+```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# PATH TO CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+
+# IMPORT LIBRARIES
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.tree import DecisionTreeClassifier
+from genetic_selection import GeneticSelectionCV
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+
+# IMPORT CUSTOM MODULES
+import utils.statisticsUtils as st
+
+```
+
+```{python paths, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# DIRECTORIES
+input_path = "../data/raw/"
+input_train_path = "../data/raw/train_data/"
+input_test_path = "../data/raw/test_data/"
+
+output_train_path = "../data/processed/train_data/"
+output_test_path = "../data/processed/test_data/"
+```
+
+```{python files}
+# FILES
+molecular_descriptors_training_file = "molecular_descriptors_training.csv"
+molecular_descriptors_test_file = "molecular_descriptors_test.csv"
+```
+
+```{python dataset name}
+dataset_name = "molecular_descriptors"
+```
+
+```{python load data, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# LOAD DATA
+molecular_descriptors = pd.read_csv(
+    input_train_path + molecular_descriptors_training_file
+)
+X = molecular_descriptors.drop(columns=["activity"])
+Y = molecular_descriptors["activity"]
+```
+
+# FILTER METHODS
+
+## LOW VARIANCE FILTER
+
+```{python}
+# REMOVE VARIABLES WITH LOW VARIANCE
+molecules_low_var_filter = st.low_variance_filter(X, 0.1)
+X_filter = X[molecules_low_var_filter]
+```
+
+## CORRELATION FILTER
+
+First of all, we are going to remove the variables that are highly correlated with each other. We will use the Spearman correlation coefficient to measure the correlation between the variables. When two variables are highly correlated, we will remove the one that has the lowest correlation with the target variable.
+
+### LINEAR CORRELATED VARIABLES
+
+```{python}
+# REMOVE VARIABLES WITH HIGH PEARSON CORRELATION
+molecules_corr_filter_pearson = st.pearson_corr_filter(X_filter, 0.8, Y)
+```
+
+```{python}
+X_filter = X_filter.drop(columns=molecules_corr_filter_pearson)
+```
+
+### NON-LINEAR CORRELATED VARIABLES
+
+```{python}
+# REMOVE VARIABLES WITH HIGH SPEARMAN CORRELATION
+molecules_corr_filter_spearman = st.spearman_corr_filter(X_filter, 0.8, Y)
+```
+
+```{python}
+X_filter = X_filter.drop(columns=molecules_corr_filter_spearman)
+```
+
+# PCA SELECTION
+
+## GET NUMBER OF COMPONENTS TO EXPLAIN 95% OF VARIANCE
+
+```{python scale pca data}
+# SCALE DATA FOR PCA
+scaler = MinMaxScaler()
+X_filter_scaled = pd.DataFrame(scaler.fit_transform(X_filter), columns=X_filter.columns)
+```
+
+```{python pca calculation}
+# PCA 95% VARIANCE
+pca = PCA(n_components=0.95)
+# DATAFRAME
+X_pca = pd.DataFrame(pca.fit_transform(X_filter_scaled))
+```
+
+```{python}
+# PLOT PCA
+pca.fit(X_filter_scaled)
+plt.figure(figsize=(10, 6))
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.xlabel("Number of components")
+plt.ylabel("Cumulative explained variance")
+```
+
+```{python}
+# PLOT TWO FIRST COMPONENTS
+plt.figure(figsize=(10, 6))
+plt.scatter(X_pca[0], X_pca[1], c=Y, cmap="plasma")
+plt.xlabel("First principal component")
+plt.ylabel("Second Principal Component")
+```
+
+```{python}
+# PLOT THREE FIRST COMPONENTS 3D
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(X_pca[0], X_pca[1], X_pca[2], c=Y, cmap="plasma")
+ax.set_xlabel("First principal component")
+ax.set_ylabel("Second Principal Component")
+ax.set_zlabel("Third Principal Component")
+```
+
+# GENETIC ALGORITH FEATURE SELECTION
+
+```{python}
+# GENETIC ALGORITHM FEATURE SELECTION
+from genetic_selection import GeneticSelectionCV
+from sklearn.metrics import roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
+
+```
+
+```{python}
+# TRAIN MODEL
+model = RandomForestClassifier(random_state=100)
+```
+
+```{python}
+# SCALED VARIABLES
+scaler = MinMaxScaler()
+X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
+```
+
+```{python}
+model.fit(X_scaled, Y)
+```
+
+```{python}
+# SELECT FEATURES
+selector = GeneticSelectionCV(
+    model,
+    cv=5,
+    verbose=1,
+    scoring="roc_auc",
+    crossover_proba=0.5,
+    mutation_proba=0.2,
+    n_generations=50,
+    crossover_independent_proba=0.5,
+    mutation_independent_proba=0.05,
+    tournament_size=3,
+    n_gen_no_change=20,
+    caching=True,
+    n_jobs=-1,
+)
+selector = selector.fit(X_scaled, Y)
+```
+
+```{python}
+# SELECT GENETIC SELECTION VARIABLES
+X_genetic_selection = X[X.columns[selector.support_]]
+```
+
+# SCALE DATA
+
+```{python}
+# MIN-MAX SCALER
+scaler = MinMaxScaler()
+# SCALE FILTER SELECTION DATA
+X_filter = pd.DataFrame(scaler.fit_transform(X_filter), columns=X_filter.columns)
+# SCALE PCA SELECTION DATA
+X_pca = pd.DataFrame(scaler.fit_transform(X_pca), columns=X_pca.columns)
+# SCALE GENETIC SELECTION DATA
+X_genetic_selection = pd.DataFrame(
+    scaler.fit_transform(X_genetic_selection), columns=X_genetic_selection.columns
+)
+```
+
+# CONCATENATE X AND Y
+
+```{python}
+# CONCATENATE X AND Y
+## FILTER SELECTION
+molecular_descriptors_filter = pd.concat([X_filter, Y], axis=1)
+## PCA SELECTION
+molecular_descriptors_pca = pd.concat([X_pca, Y], axis=1)
+## GENETIC SELECTION
+molecular_descriptors_genetic_selection = pd.concat([X_genetic_selection, Y], axis=1)
+```
+
+# PREPARE TEST DATA
+
+```{python}
+# WE DO THE SAME WITH THE TEST DATA
+molecular_descriptors_test = pd.read_csv(
+    input_test_path + molecular_descriptors_test_file
+)
+## X TEST
+X_test = molecular_descriptors_test.drop(columns=["activity"])
+## Y TEST
+Y_test = molecular_descriptors_test["activity"]
+
+# TEST DATA FOR FILTER SELECTION
+X_filter_test = X_test[X_filter.columns]
+
+## MIN-MAX SCALER FOR X TEST
+X_filter_test = pd.DataFrame(
+    scaler.fit_transform(X_filter_test), columns=X_filter_test.columns
+)
+
+## CONCATENATE X AND Y
+molecular_descriptors_filter_test = pd.concat([X_filter_test, Y_test], axis=1)
+
+# TEST DATA FOR PCA SELECTION
+## PCA TRANSFORMATION DATAFRAME
+X_pca_test = pd.DataFrame(pca.transform(X_filter_test))
+
+## MIN-MAX SCALER FOR X TEST
+X_pca_test = pd.DataFrame(scaler.fit_transform(X_pca_test), columns=X_pca_test.columns)
+
+## CONCATENATE X AND Y
+molecular_descriptors_pca_test = pd.concat([X_pca_test, Y_test], axis=1)
+
+# TEST DATA FOR GENETIC SELECTION
+X_genetic_selection_test = X_test[X_genetic_selection.columns]
+
+## MIN-MAX SCALER FOR X TEST
+X_genetic_selection_test = pd.DataFrame(
+    scaler.fit_transform(X_genetic_selection_test),
+    columns=X_genetic_selection_test.columns,
+)
+
+## CONCATENATE X AND Y
+molecular_descriptors_genetic_selection_test = pd.concat(
+    [X_genetic_selection_test, Y_test], axis=1
+)
+```
+
+# SAVE DATA
+
+```{python}
+# SAVE DATA FILTER SELECTION
+## SAVE TRAIN DATA
+molecular_descriptors_filter.to_csv(
+    output_train_path + dataset_name + "_filter_training.csv", index=False
+)
+## SAVE TEST DATA
+molecular_descriptors_filter_test.to_csv(
+    output_test_path + dataset_name + "_filter_test.csv", index=False
+)
+
+# SAVE DATA PCA SELECTION
+## SAVE TRAIN DATA
+molecular_descriptors_pca.to_csv(
+    output_train_path + dataset_name + "_pca_training.csv", index=False
+)
+## SAVE TEST DATA
+molecular_descriptors_pca_test.to_csv(
+    output_test_path + dataset_name + "_pca_test.csv", index=False
+)
+
+# SAVE DATA GENETIC SELECTION
+## SAVE TRAIN DATA
+molecular_descriptors_genetic_selection.to_csv(
+    output_train_path + dataset_name + "_genetic_selection_training.csv", index=False
+)
+## SAVE TEST DATA
+molecular_descriptors_genetic_selection_test.to_csv(
+    output_test_path + dataset_name + "_genetic_selection_test.csv", index=False
+)
+```

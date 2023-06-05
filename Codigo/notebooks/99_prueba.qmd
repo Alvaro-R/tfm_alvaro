@@ -1,0 +1,93 @@
+---
+title: "PRUEBAS"
+---
+
+```{python}
+# IMPORT LIBRARIES
+import pandas as pd
+
+
+```
+
+# MOLECULAR DESCRIPTORS UNIFICATION
+
+```{python}
+# DIRECTORIES
+input_path = "../data/processed/"
+output_path = "../data/processed/"
+# FILES
+molecular_descriptors_predefined = "CHEMBL4523954_descriptors.csv"
+molecular_descriptors_rdkit = "molecular_descriptors.csv"
+```
+
+```{python}
+# LOAD DATA
+df_predefined = pd.read_csv(input_path + molecular_descriptors_predefined)
+df_rdkit = pd.read_csv(input_path + molecular_descriptors_rdkit)
+```
+
+```{python}
+# GET DIFFERENT COLUMNS BETWEEN DATAFRAMES
+df_predefined_columns = df_predefined.columns
+df_rdkit_columns = df_rdkit.columns
+
+columnas_diferentes_predifined = df_predefined_columns.difference(df_rdkit_columns)
+
+columnas_diferentes_rdkit = df_rdkit_columns.difference(df_predefined_columns)
+```
+
+```{python}
+
+
+```
+
+
+# DIFFERENT FEATURE SELECTION METHODS
+
+## MÉTODOS GENERALES
+
+### FILTRO DE VARIANZA
+Utilizaremos este filtro para eliminar las variables que son constantes, es decir, que tienen la misma varianza en todos los datos. Para ello utilizaremos la función VarianceThreshold de sklearn.
+
+### FILTRADO DE CORRELACIÓN
+En este caso utilizaremos la correlación de Spearman ya que no asume que las variables estén normalmente distribuidas y podemos utilizar tanto para variables numéricas como categóricas.
+Cuando dos variables estén correlacionadas, se eliminará la que tenga menor correlación con la variable objetivo.
+
+## MÉTODOS ESPECÍFICOS
+
+### REGULARIZACIÓN LASSO
+
+### REGULARIZACIÓN RIDGE
+
+### REGULARIZACIÓN ELÁSTICA
+
+### RANDOM FOREST
+
+### LIGHTGBM
+
+### XGBOOST
+
+### RECURSIVE FEATURE ELIMINATION
+
+### RECURSIVE FEATURE ADDITION
+
+### RECURSIVE FEATURE ADDITION
+
+### STEPWISE
+
+### FORWARD
+
+### BACKWARD
+
+### GENETIC ALGORITHM
+
+### PCA
+
+### AUTOENCODER
+
+
+
+## PCA SELECTION
+
+## GENETIC ALGORITHM SELECTION
+

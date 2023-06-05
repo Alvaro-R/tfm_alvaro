@@ -3,12 +3,19 @@ title: "Random Forest models"
 ---
 
 ```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+# PATH TO CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+
+# IMPORT LIBRARIES
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
 from sklearn.metrics import (
     roc_curve,
     auc,
@@ -23,6 +30,12 @@ from sklearn.metrics import (
     average_precision_score,
 )
 
+import glob
+import os
+
+# IMPORT CUSTOM MODULES
+import utils.loadDataUtils as ldu
+import utils.modelsUtils as mu
 import xgboost as xgb
 
 ```
@@ -30,141 +43,93 @@ import xgboost as xgb
 ```{python paths, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
 # DIRECTORIES
 input_path = "../data/processed/"
-train_path = "../data/processed/train_data/"
-test_path = "../data/processed/test_data/"
+training_path = input_path + "train_data/"
+test_path = input_path + "test_data/"
 results_path = "../models/results/"
+
+```
+
+```{python files}
 # FILES
-# MOLECULAR DESCRIPTORS
-molecular_descriptors_training_file = "molecular_descriptors_training.csv"
-molecular_descriptors_test_file = "molecular_descriptors_test.csv"
-# MACCS KEYS
-maccs_keys_training_file = "maccs_keys_training.csv"
-maccs_keys_test_file = "maccs_keys_test.csv"
-# ECFP4 FINGERPRINTS
-ecfp4_fingerprints_training_file = "ecfp4_fingerprints_training.csv"
-ecfp4_fingerprints_test_file = "ecfp4_fingerprints_test.csv"
+
 # RESULTS FILE
 results_file = "results_table.csv"
+
 ```
 
-```{python load data, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
-# LOAD DATA
-# MOLECULAR DESCRIPTORS
-## TRAINING
-molecular_descriptors_training = pd.read_csv(
-    train_path + molecular_descriptors_training_file
+```{python load data}
+# GET TRAINING AND TEST CSV FILES
+training_csv_files = ldu.get_csv_files(training_path)
+test_csv_files = ldu.get_csv_files(test_path)
+
+# GET DATASET NAMES FROM CSV FILES
+dataset_names = ldu.get_dataset_names(training_csv_files)
+
+# LOAD TRAINING AND TEST DATA
+datasets = ldu.load_training_test_datasets(
+    datasets_names=dataset_names, training_path=training_path, test_path=test_path
 )
-X_training_molecular_descriptors = molecular_descriptors_training.drop(
-    columns=["activity"]
-)
-Y_training_molecular_descriptors = molecular_descriptors_training["activity"]
-## TEST
-molecular_descriptors_test = pd.read_csv(test_path + molecular_descriptors_test_file)
-X_test_molecular_descriptors = molecular_descriptors_test.drop(columns=["activity"])
-Y_test_molecular_descriptors = molecular_descriptors_test["activity"]
-# MACCS KEYS
-## TRAINING
-macc_keys_training = pd.read_csv(train_path + maccs_keys_training_file)
-X_training_maccs_keys = macc_keys_training.drop(columns=["activity"])
-Y_training_maccs_keys = macc_keys_training["activity"]
-## TEST
-macc_keys_test = pd.read_csv(test_path + maccs_keys_test_file)
-X_test_maccs_keys = macc_keys_test.drop(columns=["activity"])
-Y_test_maccs_keys = macc_keys_test["activity"]
-# ECFP4 FINGERPRINTS
-## TRAINING
-ecfp4_fingerprints_training = pd.read_csv(train_path + ecfp4_fingerprints_training_file)
-X_training_ecfp4_fingerprints = ecfp4_fingerprints_training.drop(columns=["activity"])
-Y_training_ecfp4_fingerprints = ecfp4_fingerprints_training["activity"]
-## TEST
-ecfp4_fingerprints_test = pd.read_csv(test_path + ecfp4_fingerprints_test_file)
-X_test_ecfp4_fingerprints = ecfp4_fingerprints_test.drop(columns=["activity"])
-Y_test_ecfp4_fingerprints = ecfp4_fingerprints_test["activity"]
+
 ```
 
-```{python}
-parameters = {
-    "n_estimators": [1, 10, 50, 100],
-    "max_depth": [3, 5, 10],
-    "learning_rate": [0.01, 0.1],
-    "gamma": [0, 0.1, 0.4],
-    "colsample_bytree": [0.3],
-    "subsample": [0.3],
-    "reg_alpha": [0, 0.1],
-    "reg_lambda": [0.1],
+# CALCULATE KNN MODEL FOR EACH DATASET
+
+## GLOBAL VARIABLES
+
+```{python knn parameters grid}
+xgboost_n_estimators = [1, 10, 50, 100]
+xgboost_max_depth = [3, 5, 10]
+xgboost_learning_rate = [0.01, 0.1]
+xgboost_gamma = [0, 0.1, 0.4]
+xgboost_colsample_bytree = [0.3]
+xgboost_subsample = [0.3]
+xgboost_reg_alpha = [0, 0.1]
+xgboost_reg_lambda = [0.1]
+
+parameters_grid = {
+    "n_estimators": [10, 50, 100],
+    "max_depth": [5, 10, 50],
+    "min_samples_split": [5, 10, 20],
+    "min_samples_leaf": [5, 10, 50],
+    "max_features": ["sqrt", "log2"],
 }
 
 ```
 
 
-# XGBOOT MODEL FOR MOLECULAR DESCRIPTORS
+## BUILD KNN MODEL
 
-```{python svm model for molecular descriptors, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
-# BUILD A XGBOOST MODEL FOR MOLECULAR DESCRIPTORS. USE GRID SEARCH TO EXPLORE ALL THE POSSIBLE COMBINATIONS AND FIND THE BEST PARAMETERS. USE 5-FOLD CROSS VALIDATION.
-# DEFINE THE MODEL
-xgb_model = xgb.XGBClassifier()
+```{python knn model}
+# IMPORT SVM MODEL
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 
-# DEFINE THE GRID SEARCH
-grid_molecular_descriptors = GridSearchCV(
-    estimator=xgb_model,
-    param_grid=parameters,
-    scoring="roc_auc",
-    n_jobs=-1,
-    cv=5,
-    verbose=3,
-)
-# TRAIN THE MODEL
-grid_molecular_descriptors.fit(
-    X_training_molecular_descriptors, Y_training_molecular_descriptors
-)
+# INSTANTIATE SVM MODEL
+svm_model = svm.SVC()
+rf_model = RandomForestClassifier(random_state=0)
 ```
 
 
-```{python}
-# WE GET THE BEST KNN MODEL
-best_model_molecular_descriptors = grid_molecular_descriptors.best_estimator_
-best_model_name = "XGBOOST Molecular Descriptors"
+```{python calculate knn model}
+xgboost_results = mu.calculate_models(
+    model=rf_model,
+    parameters_grid=parameters_grid,
+    datasets=datasets,
+    model_name="XGBoost",
+)
 ```
 
-```{python}
-# PREDICT
-Y_pred_molecular_descriptors = best_model_molecular_descriptors.predict(
-    X_test_molecular_descriptors
-)
-# EVALUATE
-accuracy = accuracy_score(Y_test_molecular_descriptors, Y_pred_molecular_descriptors)
-precision = precision_score(Y_test_molecular_descriptors, Y_pred_molecular_descriptors)
-recall = recall_score(Y_test_molecular_descriptors, Y_pred_molecular_descriptors)
-auc_molecular_descriptors = roc_auc_score(
-    Y_test_molecular_descriptors, Y_pred_molecular_descriptors
-)
-# AUC TRAINING
-Y_pred_train_molecular_descriptors = best_model_molecular_descriptors.predict(
-    X_training_molecular_descriptors
-)
-auc_train_molecular_descriptors = roc_auc_score(
-    Y_training_molecular_descriptors, Y_pred_train_molecular_descriptors
-)
-
-# CREATE DATAFRAME WITH RESULTS
-results_molecular_descriptors = pd.DataFrame(
-    {
-        "model_name": [best_model_name],
-        "accuracy": [round(accuracy, 2)],
-        "precision": [round(precision, 2)],
-        "recall": [round(recall, 2)],
-        "auc": [round(auc_molecular_descriptors, 2)],
-        "auc_train": [round(auc_train_molecular_descriptors, 2)],
-    }
-)
-
-```
-
-```{python}
-# SAVE TABLE_RESULTS.CSV
+```{python save knn results}
+# OPEN FILE
+file = open(results_path + results_file, "a")
+# REMOVE ROWS IN TABLE_RESULTS.CSV THAT STARTS WITH XGBoost
 table_results = pd.read_csv(results_path + results_file)
-table_results = table_results.append(results_molecular_descriptors)
+table_results = table_results[~table_results["model_name"].str.startswith("XGBoost")]
 table_results.to_csv(results_path + results_file, index=False)
+# WRITE RESULTS
+xgboost_results.to_csv(file, header=False, index=False)
+# CLOSE FILE
+file.close()
 ```
 
 # XGBOOST MODEL FOR MACCS KEYS

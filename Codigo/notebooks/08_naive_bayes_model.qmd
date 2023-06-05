@@ -2,13 +2,20 @@
 title: "Naive Bayes models"
 ---
 
-```{python import libraries, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+```{python import libraries}
+# PATH TO CUSTOM MODULES
+import sys
+
+sys.path.append("../src")
+
+# IMPORT LIBRARIES
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
 from sklearn.metrics import (
     roc_curve,
     auc,
@@ -22,136 +29,96 @@ from sklearn.metrics import (
     precision_recall_curve,
     average_precision_score,
 )
+
+import glob
+import os
+
+# IMPORT CUSTOM MODULES
+import utils.loadDataUtils as ldu
+import utils.modelsUtils as mu
+
 from sklearn.naive_bayes import GaussianNB
 
 
 ```
 
+
 ```{python paths, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
 # DIRECTORIES
 input_path = "../data/processed/"
-train_path = "../data/processed/train_data/"
-test_path = "../data/processed/test_data/"
+training_path = input_path + "train_data/"
+test_path = input_path + "test_data/"
 results_path = "../models/results/"
+
+```
+
+```{python files}
 # FILES
-# MOLECULAR DESCRIPTORS
-molecular_descriptors_training_file = "molecular_descriptors_training.csv"
-molecular_descriptors_test_file = "molecular_descriptors_test.csv"
-# MACCS KEYS
-maccs_keys_training_file = "maccs_keys_training.csv"
-maccs_keys_test_file = "maccs_keys_test.csv"
-# ECFP4 FINGERPRINTS
-ecfp4_fingerprints_training_file = "ecfp4_fingerprints_training.csv"
-ecfp4_fingerprints_test_file = "ecfp4_fingerprints_test.csv"
+
 # RESULTS FILE
 results_file = "results_table.csv"
+
 ```
 
-```{python load data, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
-# LOAD DATA
-# MOLECULAR DESCRIPTORS
-## TRAINING
-molecular_descriptors_training = pd.read_csv(
-    train_path + molecular_descriptors_training_file
+```{python load data}
+# GET TRAINING AND TEST CSV FILES
+training_csv_files = ldu.get_csv_files(training_path)
+test_csv_files = ldu.get_csv_files(test_path)
+
+# GET DATASET NAMES FROM CSV FILES
+dataset_names = ldu.get_dataset_names(training_csv_files)
+
+# LOAD TRAINING AND TEST DATA
+datasets = ldu.load_training_test_datasets(
+    datasets_names=dataset_names, training_path=training_path, test_path=test_path
 )
-X_training_molecular_descriptors = molecular_descriptors_training.drop(
-    columns=["activity"]
-)
-Y_training_molecular_descriptors = molecular_descriptors_training["activity"]
-## TEST
-molecular_descriptors_test = pd.read_csv(test_path + molecular_descriptors_test_file)
-X_test_molecular_descriptors = molecular_descriptors_test.drop(columns=["activity"])
-Y_test_molecular_descriptors = molecular_descriptors_test["activity"]
-# MACCS KEYS
-## TRAINING
-macc_keys_training = pd.read_csv(train_path + maccs_keys_training_file)
-X_training_maccs_keys = macc_keys_training.drop(columns=["activity"])
-Y_training_maccs_keys = macc_keys_training["activity"]
-## TEST
-macc_keys_test = pd.read_csv(test_path + maccs_keys_test_file)
-X_test_maccs_keys = macc_keys_test.drop(columns=["activity"])
-Y_test_maccs_keys = macc_keys_test["activity"]
-# ECFP4 FINGERPRINTS
-## TRAINING
-ecfp4_fingerprints_training = pd.read_csv(train_path + ecfp4_fingerprints_training_file)
-X_training_ecfp4_fingerprints = ecfp4_fingerprints_training.drop(columns=["activity"])
-Y_training_ecfp4_fingerprints = ecfp4_fingerprints_training["activity"]
-## TEST
-ecfp4_fingerprints_test = pd.read_csv(test_path + ecfp4_fingerprints_test_file)
-X_test_ecfp4_fingerprints = ecfp4_fingerprints_test.drop(columns=["activity"])
-Y_test_ecfp4_fingerprints = ecfp4_fingerprints_test["activity"]
+
 ```
 
-# NAIVE BAYES MODEL FOR MOLECULAR DESCRIPTORS
+# CALCULATE KNN MODEL FOR EACH DATASET
 
-```{python, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
-# BUILD A NAIVE BAYES MODEL FOR MOLECULAR DESCRIPTORS DATA. USE GRID SEARCH AND CROSS-VALIDATION TO FIND THE BEST HYPERPARAMETERS FOR THE MODEL.
-# CREATE A GRID OF POSSIBLE VALUES FOR THE HYPERPARAMETERS
-param_grid = {
-    "var_smoothing": np.logspace(0, -9, num=100),
-}
-# CREATE THE GRID SEARCH OBJECT
-grid_molecular_descriptors = GridSearchCV(
-    estimator=GaussianNB(),
-    param_grid=param_grid,
-    cv=5,
-    n_jobs=-1,
-    scoring="roc_auc",
-    verbose=1,
+## GLOBAL VARIABLES
+
+```{python knn parameters grid}
+nb_var_smoothing = np.logspace(0, -9, num=100)
+parameters_grid = dict(
+    var_smoothing=nb_var_smoothing,
 )
+```
 
-# FIT THE GRID SEARCH TO THE DATA
-grid_molecular_descriptors.fit(
-    X_training_molecular_descriptors, Y_training_molecular_descriptors
+## BUILD KNN MODEL
+
+```{python knn model}
+nb_model = GaussianNB()
+```
+
+```{python calculate knn model}
+nb_results = mu.calculate_models(
+    model=nb_model,
+    parameters_grid=parameters_grid,
+    datasets=datasets,
+    model_name="Naive_Bayes",
 )
-
 ```
 
 ```{python}
-# WE GET THE BEST KNN MODEL
-best_model_molecular_descriptors = grid_molecular_descriptors.best_estimator_
-best_model_name = "Naive Bayes Molecular Descriptors"
+roc_curves = knn_results[1]
+knn_results = knn_results[0]
 ```
 
-```{python}
-# PREDICT
-Y_pred_molecular_descriptors = best_model_molecular_descriptors.predict(
-    X_test_molecular_descriptors
-)
-# EVALUATE
-accuracy = accuracy_score(Y_test_molecular_descriptors, Y_pred_molecular_descriptors)
-precision = precision_score(Y_test_molecular_descriptors, Y_pred_molecular_descriptors)
-recall = recall_score(Y_test_molecular_descriptors, Y_pred_molecular_descriptors)
-auc_molecular_descriptors = roc_auc_score(
-    Y_test_molecular_descriptors, Y_pred_molecular_descriptors
-)
-# AUC TRAINING
-Y_pred_train_molecular_descriptors = best_model_molecular_descriptors.predict(
-    X_training_molecular_descriptors
-)
-auc_train_molecular_descriptors = roc_auc_score(
-    Y_training_molecular_descriptors, Y_pred_train_molecular_descriptors
-)
-
-# CREATE DATAFRAME WITH RESULTS
-results_molecular_descriptors = pd.DataFrame(
-    {
-        "model_name": [best_model_name],
-        "accuracy": [round(accuracy, 2)],
-        "precision": [round(precision, 2)],
-        "recall": [round(recall, 2)],
-        "auc": [round(auc_molecular_descriptors, 2)],
-        "auc_train": [round(auc_train_molecular_descriptors, 2)],
-    }
-)
-
-```
-
-```{python}
-# SAVE TABLE_RESULTS.CSV
+```{python save knn results}
+# OPEN FILE
+file = open(results_path + results_file, "a")
+# REMOVE ROWS IN TABLE_RESULTS.CSV THAT STARTS WITH Naive_Bayes
 table_results = pd.read_csv(results_path + results_file)
-table_results = table_results.append(results_molecular_descriptors)
+table_results = table_results[
+    ~table_results["model_name"].str.startswith("Naive_Bayes")
+]
 table_results.to_csv(results_path + results_file, index=False)
+# WRITE RESULTS
+nb_results.to_csv(file, header=False, index=False)
+# CLOSE FILE
+file.close()
 ```
 
 # NAIVE BAYES MODEL FOR MACCS KEYS
@@ -159,9 +126,7 @@ table_results.to_csv(results_path + results_file, index=False)
 ```{python, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
 # BUILD A NAIVE BAYES MODEL FOR MACCS KEYS DATA. USE GRID SEARCH AND CROSS-VALIDATION TO FIND THE BEST HYPERPARAMETERS FOR THE MODEL.
 # CREATE A GRID OF POSSIBLE VALUES FOR THE HYPERPARAMETERS
-param_grid = {
-    "var_smoothing": np.logspace(0, -9, num=100),
-}
+
 # CREATE THE GRID SEARCH OBJECT
 grid_maccs_keys = GridSearchCV(
     estimator=GaussianNB(),
